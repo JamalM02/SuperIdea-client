@@ -1,4 +1,3 @@
-// src/App.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { BrowserRouter as Router, Route, Routes, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import HomeComponent from './components/Home/Home.component';
@@ -39,6 +38,7 @@ function App() {
     setUser(null);
     navigate('/home');
     toast.success('Logged out successfully!');
+    setIsNavbarCollapsed(true); // Close the navbar after logout
   }, [navigate]);
 
   useEffect(() => {
@@ -77,16 +77,16 @@ function App() {
     };
   }, [handleLogout]);
 
+  useEffect(() => {
+    setIsNavbarCollapsed(true); // Collapse the navbar on route change
+  }, [location]);
+
   const toggleNavbar = () => {
     setIsNavbarCollapsed(!isNavbarCollapsed);
   };
 
-  const handleNavLinkClick = () => {
-    setIsNavbarCollapsed(true);
-  };
-
   const loggedInLinks = [
-    { label: `Hi ${user ? user.fullName : ''}!`},
+    { label: `Hi ${user ? user.fullName : ''}!`, path: '' },
     { path: '/user-account', label: 'My Profile' },
     { path: '/ideas', label: 'Ideas' },
     { path: '/our-team', label: 'Meet The Team' }
@@ -110,9 +110,9 @@ function App() {
             <ul className="navbar-nav me-auto">
               {user ? (
                   loggedInLinks.map(link => (
-                      <li className="nav-item" key={link.path}>
+                      <li className="nav-item" key={link.label}>
                         {link.path ? (
-                            <Link className="nav-link" to={link.path} onClick={handleNavLinkClick}>{link.label}</Link>
+                            <Link className="nav-link" to={link.path}>{link.label}</Link>
                         ) : (
                             <span className="nav-link">{link.label}</span>
                         )}
@@ -121,14 +121,14 @@ function App() {
               ) : (
                   <>
                     <li className="nav-item">
-                      <Link className="nav-link" to="/home" onClick={handleNavLinkClick}>Home</Link>
+                      <Link className="nav-link" to="/home">Home</Link>
                     </li>
                     <li className="nav-item">
-                      <Link className="nav-link" to="/our-team" onClick={handleNavLinkClick}>Meet The Team</Link>
+                      <Link className="nav-link" to="/our-team">Meet The Team</Link>
                     </li>
                     {location.pathname !== '/home' && (
                         <li className="nav-item">
-                          <Link className="nav-link" to="/login" onClick={handleNavLinkClick}>Sign in</Link>
+                          <Link className="nav-link" to="/login">Sign in</Link>
                         </li>
                     )}
                   </>
@@ -137,7 +137,7 @@ function App() {
             <ul className="navbar-nav ms-auto">
               {user && (
                   <li className="nav-item">
-                    <button className="btn btn-link nav-link" onClick={handleLogout}>Logout</button>
+                    <button className="btn btn-link nav-link" onClick={() => { handleLogout(); }}>Logout</button>
                   </li>
               )}
             </ul>

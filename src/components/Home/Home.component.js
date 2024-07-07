@@ -30,13 +30,13 @@ function HomeComponent() {
                 <div className="home-log-content-container">
                     <p className="home-log-description">Got a great idea?!</p>
                     <div className="home-log-login-register-container">
-                        <div className="home-login-container">
-                            <Link to="/login" className="home-login-link">Sign in</Link>
-                        </div>
+                        <Link to="/login" className="home-login-container">
+                            <div className="home-login-link">Sign in</div>
+                        </Link>
                         <p className="home-or-text">or</p>
-                        <div className="home-register-container">
-                            <Link to="/register" className="home-register-link">Sign up</Link>
-                        </div>
+                        <Link to="/register" className="home-register-container">
+                            <div className="home-register-link">Sign up</div>
+                        </Link>
                     </div>
                 </div>
             </div>
