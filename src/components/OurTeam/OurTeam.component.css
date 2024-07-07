@@ -1,0 +1,77 @@
+/* src/components/OurTeamComponent/OurTeamComponent.component.css */
+.our-team {
+    padding: 20px;
+    background: #212529;
+    border-radius: 30px;
+    margin-bottom: 40px;
+}
+
+.our-team-logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 50%;
+}
+
+.our-team .row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.our-team .column {
+    flex: 33.33%;
+    padding: 5px;
+}
+
+.our-team .card {
+    box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    transition: 0.3s;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.our-team .card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.our-team .container {
+    padding: 16px;
+}
+
+.our-team .title {
+    color: grey;
+}
+
+.our-team .button {
+    border: none;
+    outline: 0;
+    display: inline-block;
+    padding: 8px;
+    color: white;
+    background-color: #000;
+    text-align: center;
+    cursor: pointer;
+    width: 100%;
+    border-radius: 5px;
+}
+
+.our-team .button:hover {
+    background-color: #555;
+}
+
+.our-team-cards {
+    margin-top: 30px;
+}
+
+.our-team ul {
+    text-align: left;
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+}
+
+.our-team ul li {
+    margin-bottom: 0.5rem;
+}

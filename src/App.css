@@ -1,0 +1,25 @@
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-image: url('./assets/home-background.png'); /* Replace with the path to your image */
+  background-size: cover; /* This will make the image cover the entire container */
+  background-position: top;}
+
+
+.App {
+  text-align: center;
+  color: white; /* Set default text color to white for better readability on dark background */
+}
+
+.navbar {
+  color: #ffffff; /* Navbar text color */
+  z-index: 1000;
+}
+
+.navbar .nav-link {
+  color: #ffffff; /* Navbar links text color */
+}
+
+

@@ -1,0 +1,71 @@
+/* src/LoginStyles.css */
+
+/* Custom LoginComponent Styles */
+.login-container {
+    position: relative;
+    margin: 0 auto;
+    padding: 2rem;
+    background: rgba(233, 237, 241, 0.69);
+    border-radius: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-color: black;
+    border-style: solid;
+}
+
+.login-btn {
+    width: 100%;
+}
+
+.login-form-group {
+    margin-bottom: 1rem;
+}
+
+.login-form-control {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+    border-radius: 4px;
+    border-color: black;
+    border-style: double;
+}
+
+.login-btn:hover {
+    background-color: #0056b3;
+}
+
+.login-register-link {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.login-register-link a {
+    color: gray;
+    text-decoration: none;
+}
+
+.login-register-link a:hover {
+    text-decoration: underline;
+}
+
+.login-heading {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: black;
+}
+
+.login-email-head {
+    width: 100%;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1rem;
+    color: black;
+}
+
+.login-password-head {
+    width: 100%;
+    text-align: left;
+    font-weight: bold;
+    font-size: 1rem;
+    color: black;
+}

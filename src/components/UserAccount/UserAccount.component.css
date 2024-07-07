@@ -1,0 +1,168 @@
+/* src/components/UserAccount/UserAccount.component.css */
+.user-account-wrapper {
+    padding: 20px;
+    background: linear-gradient(to right, rgba(33, 37, 41, 0.8), rgba(101, 117, 161, 0.64));
+    border-radius: 10px;
+    margin-top: -48px; /* Adjust this value to match the height of your navbar */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 100%;
+    color: white;
+}
+
+.user-account-header {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 2.5rem;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.account-management-buttons {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.user-achievements,
+.user-ideas,
+.user-reports {
+    margin-top: 20px;
+    background: rgba(187, 209, 235, 0.91);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-achievements-title,
+.user-ideas-title,
+.user-reports-title {
+    height: 50px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    background: linear-gradient(to right, #010f1f, rgba(42, 82, 152, 0.67)); /* Modern gradient background */
+    border-radius: 10px;
+    font-family: "Playwrite IT Moderna", cursive
+}
+
+.user-achievements-list {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+}
+
+.user-achievements-list li {
+    color: rgba(34, 30, 30, 0.8);
+    font-weight: bold;
+    margin-bottom: 5px;
+    font-size: 1.1rem;
+}
+
+.user-ideas-table-wrapper,
+.user-reports-table-wrapper {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 30px;
+}
+
+.user-ideas-table,
+.user-reports-table {
+    width: 97%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ensures that long words break properly */
+    word-wrap: break-word; /* Ensures that long words break properly */
+    margin-left: 10px;
+}
+
+.user-ideas-table th,
+.user-reports-table th{
+    padding: 10px;
+    border: 2px solid rgba(1, 15, 31, 0.43);
+    text-align: center;
+    font-size: 1.1rem;
+    background: rgba(33, 37, 41, 0.79);
+    color: white;
+    word-break: break-word; /* Ensures that long words break properly */
+    overflow-wrap: break-word; /* Ensures that long words break properly */
+
+}
+
+.user-ideas-table td,
+.user-reports-table td{
+    padding: 10px;
+    border: 2px solid rgba(1, 15, 31, 0.43);
+    font-size: 1rem;
+    word-break: break-word; /* Ensures that long words break properly */
+    overflow-wrap: break-word; /* Ensures that long words break properly */
+}
+
+.user-ideas-thead,
+.user-reports-thead {
+    background: rgba(33, 37, 41, 0.79);
+    color: white;
+}
+
+.edit-profile-button,
+.logout-button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    padding: 10px 20px;
+    margin-right: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.edit-profile-button:hover,
+.logout-button:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.user-page-title-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: linear-gradient(to right, rgba(37, 46, 62, 0.91), rgba(101, 117, 161, 0.76));
+    border-radius: 10px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.user-page-title {
+    font-family: 'Playwrite IT Moderna', cursive;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.user-page-subtitle {
+    margin-top: 6px;
+    font-size: 1em;
+    color: #ffffff;
+    text-align: left;
+}
+
+.user-title-subtitle-container {
+    text-align: left;
+}
+
+.like-click {
+    cursor: pointer;
+    color: #0970d6;
+}
+
+.subject-field{
+    text-align: left;
+    color: #0d0c0c;
+    font-weight: bold;
+}
+
+.user-reports-container {
+    margin-top: 20px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}

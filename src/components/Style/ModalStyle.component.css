@@ -1,0 +1,54 @@
+/* src/ModalStyles.css */
+
+/* Custom Modal Styles */
+.custom-modal .modal-content {
+    background: linear-gradient(to right, rgba(33, 37, 41, 0.8), rgba(101, 117, 161, 0.64));
+    border-radius: 15px;
+    color: white;
+}
+
+.custom-modal .modal-header {
+    border-bottom: none;
+    justify-content: center;
+}
+
+.custom-modal .modal-title {
+    font-size: 2em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.69);
+}
+
+.custom-modal .modal-body {
+    padding: 20px;
+    text-align: center;
+    max-height: 300px; /* Adjust this value as needed */
+    overflow-y: auto; /* Add scroll */
+}
+
+.custom-modal .modal-footer {
+    border-top: none;
+    justify-content: center;
+}
+
+.custom-modal .btn-secondary {
+    background: #6c757d;
+    border: none;
+}
+
+.custom-modal .btn-success {
+    background: #28a745;
+    border: none;
+}
+
+/* Add styles for the character reminder */
+.char-reminder {
+    color: #ffcc00; /* Change the color as desired */
+}
+
+/* Add styles for the user type in the likes list */
+.like-user-type {
+    font-size: 0.8em;
+    color: #ddd; /* Adjust the color as needed */
+    margin-left: 5px;
+}

@@ -1,0 +1,41 @@
+/* ToastStyles.css */
+.Toastify__toast--success {
+    background: rgba(33, 37, 41, 0.76) !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.Toastify__toast--error {
+    background: #dc3545 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.Toastify__toast--info {
+    background: #17a2b8 !important;
+    color: #fff !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.Toastify__toast--warning {
+    background: #ffc107 !important;
+    color: #212529 !important;
+    border-radius: 8px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.Toastify__toast-body {
+    font-family: 'Roboto', sans-serif !important;
+    font-size: 16px !important;
+}
+
+.Toastify__close-button {
+    color: #fff !important;
+}
+
+.Toastify__progress-bar {
+    background: rgba(255, 255, 255, 0.7) !important;
+}
