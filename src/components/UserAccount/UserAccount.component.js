@@ -103,7 +103,7 @@ function UserAccountComponent({ user }) {
                     <Link to="/ideas">
                         <div className="account-buttons">
                         <Button className="ideas-link-button">
-                            Let add some ideas
+                            Lets add some ideas
                         </Button>
                         </div>
                     </Link>
