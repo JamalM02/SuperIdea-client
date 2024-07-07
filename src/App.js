@@ -19,7 +19,6 @@ import { io } from 'socket.io-client';
 
 const API_URL = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_PROD : process.env.REACT_APP_API_URL_DEV;
 const SOCKET_URL = API_URL.replace('/api', '');
-
 const socket = io(SOCKET_URL);
 
 const INACTIVITY_TIMEOUT = 300000; // 5 minutes
