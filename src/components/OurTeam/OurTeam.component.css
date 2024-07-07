@@ -1,7 +1,7 @@
 /* src/components/OurTeamComponent/OurTeamComponent.component.css */
 .our-team {
     padding: 20px;
-    background: #212529;
+    background: linear-gradient(to right, rgba(33, 37, 41, 0.8), rgba(101, 117, 161, 0.64));
     border-radius: 30px;
     margin-bottom: 40px;
 }

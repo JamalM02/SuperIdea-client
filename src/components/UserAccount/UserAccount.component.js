@@ -3,13 +3,34 @@ import { getUserAchievements, getUserIdeas, getReport } from '../../services/api
 import { Modal, Button } from 'react-bootstrap';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
+import { Link } from "react-router-dom";
+
+// Retry function
+const retry = async (fn, retriesLeft = 5, interval = 1000) => {
+    try {
+        return await fn();
+    } catch (error) {
+        if (retriesLeft === 1) throw error;
+        await new Promise(r => setTimeout(r, interval));
+        return retry(fn, retriesLeft - 1, interval);
+    }
+};
 
 function UserAccountComponent({ user }) {
     const [achievements, setAchievements] = useState(null);
     const [ideas, setIdeas] = useState([]);
+    const [report, setReport] = useState(null);
     const [showLikes, setShowLikes] = useState(null);
     const [showModal, setShowModal] = useState(false);
-    const [report, setReport] = useState(null);
+
+    const [loadingAchievements, setLoadingAchievements] = useState(false);
+    const [errorAchievements, setErrorAchievements] = useState(null);
+
+    const [loadingIdeas, setLoadingIdeas] = useState(false);
+    const [errorIdeas, setErrorIdeas] = useState(null);
+
+    const [loadingReport, setLoadingReport] = useState(false);
+    const [errorReport, setErrorReport] = useState(null);
 
     useEffect(() => {
         if (user) {
@@ -20,29 +41,44 @@ function UserAccountComponent({ user }) {
     }, [user]);
 
     const fetchAchievements = async (userId) => {
+        setLoadingAchievements(true);
+        setErrorAchievements(null);
         try {
-            const response = await getUserAchievements(userId);
+            const response = await retry(() => getUserAchievements(userId));
             setAchievements(response);
         } catch (error) {
             console.error('Failed to fetch achievements', error);
+            setErrorAchievements('Failed to load achievements');
+        } finally {
+            setLoadingAchievements(false);
         }
     };
 
     const fetchUserIdeas = async (userId) => {
+        setLoadingIdeas(true);
+        setErrorIdeas(null);
         try {
-            const response = await getUserIdeas(userId);
+            const response = await retry(() => getUserIdeas(userId));
             setIdeas(response);
         } catch (error) {
             console.error('Failed to fetch user ideas', error);
+            setErrorIdeas('Failed to load ideas');
+        } finally {
+            setLoadingIdeas(false);
         }
     };
 
     const fetchReport = async () => {
+        setLoadingReport(true);
+        setErrorReport(null);
         try {
-            const response = await getReport();
+            const response = await retry(getReport);
             setReport(response);
         } catch (error) {
             console.error('Failed to fetch report', error);
+            setErrorReport('Failed to load report');
+        } finally {
+            setLoadingReport(false);
         }
     };
 
@@ -61,28 +97,41 @@ function UserAccountComponent({ user }) {
             <div className="user-page-title-container">
                 <div className="user-title-subtitle-container">
                     <div className="user-page-title">{user ? user.fullName : 'Loading...'}</div>
-                    <p className="user-page-subtitle">{user ? user.email : 'Loading...'}</p>
+                    <div className="user-page-subtitle">{user ? user.email : 'Loading...'}</div>
                 </div>
-                <div className="account-management-buttons">
-                    <button className="edit-profile-button">Edit Profile</button>
-                </div>
+                {user && (
+                    <Link to="/ideas">
+                        <div className="account-buttons">
+                        <Button className="ideas-link-button">
+                            Lets add some ideas
+                        </Button>
+                        </div>
+                    </Link>
+                )}
             </div>
-            {achievements ? (
-                <div className="user-achievements">
-                    <div className="user-achievements-title">Achievements</div>
+
+            <div>
+                {loadingAchievements ? (
+                    <p className="loading">Loading achievements...</p>
+                ) : errorAchievements ? (
+                    <p className="error">{errorAchievements}</p>
+                ) : achievements ? (
                     <ul className="user-achievements-list">
                         <li>Ideas submitted: {achievements.totalIdeas}</li>
                         <li>Ideas liked: {achievements.totalLikes}</li>
                         <li>Top contributor: {achievements.topContributor ? 'Yes' : 'No'}</li>
                     </ul>
-                </div>
-            ) : (
-                <p>Loading achievements...</p>
-            )}
+                ) : null}
+            </div>
+
             <div className="user-ideas">
                 <div className="user-ideas-title">Your Ideas</div>
                 <div className="user-ideas-table-wrapper">
-                    {ideas.length > 0 ? (
+                    {loadingIdeas ? (
+                        <p className="loading">Loading ideas...</p>
+                    ) : errorIdeas ? (
+                        <p className="error">{errorIdeas}</p>
+                    ) : ideas.length > 0 ? (
                         <table className="user-ideas-table">
                             <thead className="user-ideas-thead">
                             <tr>
@@ -94,7 +143,8 @@ function UserAccountComponent({ user }) {
                             {ideas.map((idea) => (
                                 <tr key={idea._id}>
                                     <td className="subject-field">{idea.title}</td>
-                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)} style={{ cursor: 'pointer' }}>
+                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)}
+                                        style={{ cursor: 'pointer' }}>
                                         {idea.likesCount}
                                     </td>
                                 </tr>
@@ -106,10 +156,15 @@ function UserAccountComponent({ user }) {
                     )}
                 </div>
             </div>
-            {report ? (
-                <div className="user-reports">
-                    <div className="user-reports-title">Reports</div>
-                    <div className="user-reports-table-wrapper">
+
+            <div className="user-reports">
+                <div className="user-reports-title">Reports</div>
+                <div className="user-reports-table-wrapper">
+                    {loadingReport ? (
+                        <p className="loading">Loading report...</p>
+                    ) : errorReport ? (
+                        <p className="error">{errorReport}</p>
+                    ) : report ? (
                         <table className="user-reports-table">
                             <thead className="user-reports-thead">
                             <tr>
@@ -128,11 +183,10 @@ function UserAccountComponent({ user }) {
                             </tr>
                             </tbody>
                         </table>
-                    </div>
+                    ) : null}
                 </div>
-            ) : (
-                <p>Loading report...</p>
-            )}
+            </div>
+
             <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>Likes</Modal.Title>
