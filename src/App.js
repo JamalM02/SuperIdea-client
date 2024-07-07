@@ -22,7 +22,6 @@ const SOCKET_URL = API_URL.replace('/api', '');
 const socket = io(SOCKET_URL);
 
 const INACTIVITY_TIMEOUT = 300000; // 5 minutes
-
 const PrivateRoute = ({ element, ...rest }) => {
   const isAuthenticated = localStorage.getItem('user');
   return isAuthenticated ? element : <Navigate to="/login" />;
