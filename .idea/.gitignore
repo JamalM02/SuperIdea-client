@@ -27,3 +27,4 @@ rad.json
 TestResults.xml
 package-lock.json
 node_modules
+.env
