@@ -3,6 +3,7 @@
 /workspace.xml
 # Editor-based HTTP Client requests
 /httpRequests/
+
 ### AL ###
 #Template for AL projects for Dynamics 365 Business Central
 #launch.json folder
@@ -16,6 +17,8 @@
 #Testing Output folder
 .output/
 #Extension App-file
+
+
 *.app
 #Rapid Application Development File
 rad.json
@@ -27,4 +30,5 @@ rad.json
 TestResults.xml
 package-lock.json
 node_modules
+.gitignore
 .env
