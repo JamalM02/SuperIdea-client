@@ -9,6 +9,16 @@ import { formatDistanceToNow } from 'date-fns/esm';
 const DESCRIPTION_CHARACTER_LIMIT = 300;
 const TITLE_CHARACTER_LIMIT = 30;
 
+const retry = async (fn, retriesLeft = 5, interval = 1000) => {
+    try {
+        return await fn();
+    } catch (error) {
+        if (retriesLeft === 1) throw error;
+        await new Promise(r => setTimeout(r, interval));
+        return retry(fn, retriesLeft - 1, interval);
+    }
+};
+
 function Ideas() {
     const [ideas, setIdeas] = useState([]);
     const [title, setTitle] = useState('');
@@ -18,12 +28,23 @@ function Ideas() {
     const [target, setTarget] = useState(null);
     const [remainingTitleChars, setRemainingTitleChars] = useState(TITLE_CHARACTER_LIMIT);
     const [remainingDescriptionChars, setRemainingDescriptionChars] = useState(DESCRIPTION_CHARACTER_LIMIT);
+    const [loadingIdeas, setLoadingIdeas] = useState(false);
+    const [errorIdeas, setErrorIdeas] = useState(null);
 
     useEffect(() => {
         const fetchAllIdeas = async () => {
-            let ideasList = await fetchIdeas();
-            ideasList = ideasList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-            setIdeas(ideasList);
+            setLoadingIdeas(true);
+            setErrorIdeas(null);
+            try {
+                let ideasList = await retry(fetchIdeas);
+                ideasList = ideasList.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                setIdeas(ideasList);
+            } catch (error) {
+                console.error('Failed to fetch ideas', error);
+                setErrorIdeas('Failed to load ideas');
+            } finally {
+                setLoadingIdeas(false);
+            }
         };
 
         fetchAllIdeas();
@@ -47,7 +68,7 @@ function Ideas() {
             await createIdea(newIdea);
             resetForm();
             setShowModal(false);
-            let updatedIdeas = await fetchIdeas();
+            let updatedIdeas = await retry(fetchIdeas);
             updatedIdeas = updatedIdeas.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             setIdeas(updatedIdeas);
             toast.success('New idea added successfully!');
@@ -127,7 +148,7 @@ function Ideas() {
                             className="form-control mb-2"
                         />
                         <small className="char-reminder">
-                            {remainingDescriptionChars} characters remaining
+                            {remainingTitleChars} characters remaining
                         </small>
                         <textarea
                             placeholder="Description"
@@ -136,6 +157,9 @@ function Ideas() {
                             className="form-control mb-2"
                             rows="5"
                         />
+                        <small className="char-reminder">
+                            {remainingDescriptionChars} characters remaining
+                        </small>
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -149,7 +173,11 @@ function Ideas() {
             </Modal>
 
             <div className="ideas-list">
-                {ideas.length > 0 ? (
+                {loadingIdeas ? (
+                    <p className="loading">Loading ideas...</p>
+                ) : errorIdeas ? (
+                    <p className="error">{errorIdeas}</p>
+                ) : ideas.length > 0 ? (
                     ideas.map((idea) => (
                         <div key={idea._id} className="idea-bubble">
                             <div className="creator">{`${idea.user.fullName} (${idea.user.type})`}
@@ -172,7 +200,7 @@ function Ideas() {
                         </div>
                     ))
                 ) : (
-                    <h1 className="no-ideas">No ideas yet</h1>
+                    <h1 className="no-ideas">No ideas to display.</h1>
                 )}
             </div>
 
