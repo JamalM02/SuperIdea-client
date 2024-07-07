@@ -24,6 +24,7 @@ export const getUserAchievements = async (userId) => {
     }
 };
 
+
 export const getUserIdeas = async (userId) => {
     try {
         const response = await axios.get(`${API_URL}/users/${userId}/ideas`);
