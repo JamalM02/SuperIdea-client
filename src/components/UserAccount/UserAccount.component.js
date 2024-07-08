@@ -102,9 +102,9 @@ function UserAccountComponent({ user }) {
                 {user && (
                     <Link to="/ideas">
                         <div className="account-buttons">
-                        <Button className="ideas-link-button">
-                            Lets add some ideas
-                        </Button>
+                            <Button className="ideas-link-button">
+                                Lets add some ideas
+                            </Button>
                         </div>
                     </Link>
                 )}
@@ -175,11 +175,11 @@ function UserAccountComponent({ user }) {
                             <tbody>
                             <tr>
                                 <td>Students</td>
-                                <td>{report.studentIdeasCount}</td>
+                                <td>{report.totalStudentIdeas}</td>
                             </tr>
                             <tr>
                                 <td>Teachers</td>
-                                <td>{report.teacherIdeasCount}</td>
+                                <td>{report.totalTeacherIdeas}</td>
                             </tr>
                             </tbody>
                         </table>
