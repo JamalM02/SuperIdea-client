@@ -1,3 +1,4 @@
+// components/Ideas/Ideas.component.js
 import React, { useState, useEffect } from 'react';
 import { fetchIdeas, createIdea, likeIdea } from '../../services/api.service';
 import { toast } from 'react-toastify';

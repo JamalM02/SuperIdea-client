@@ -143,8 +143,7 @@ function UserAccountComponent({ user }) {
                             {ideas.map((idea) => (
                                 <tr key={idea._id}>
                                     <td className="subject-field">{idea.title}</td>
-                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)}
-                                        style={{ cursor: 'pointer' }}>
+                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)} style={{ cursor: 'pointer' }}>
                                         {idea.likesCount}
                                     </td>
                                 </tr>
