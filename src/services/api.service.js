@@ -12,7 +12,14 @@ export const fetchIdeas = async () => {
 
 export const createIdea = async (idea) => {
     try {
-        const response = await axios.post(`${API_URL}/ideas`, idea);
+        const user = JSON.parse(localStorage.getItem('user'));
+        const simplifiedUser = {
+            _id: user._id,
+            fullName: user.fullName,
+            type: user.type
+        };
+
+        const response = await axios.post(`${API_URL}/ideas`, { ...idea, user: simplifiedUser });
         return response.data;
     } catch (error) {
         if (error.response && error.response.data.errors) {
@@ -57,7 +64,7 @@ export const likeIdea = async (ideaId, userId) => {
         const response = await axios.post(`${API_URL}/ideas/${ideaId}/like`, { userId });
         return response.data;
     } catch (error) {
-        console.error('Error liking idea', error);
+        console.error('Error liking idea:', error);
         throw error;
     }
 };

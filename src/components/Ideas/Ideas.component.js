@@ -62,7 +62,11 @@ function Ideas() {
         const newIdea = {
             title,
             description,
-            user,
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                type: user.type
+            },
         };
 
         try {
