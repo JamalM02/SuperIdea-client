@@ -1,3 +1,4 @@
+// services/api.service.js
 import axios from 'axios';
 
 const API_URL = process.env.NODE_ENV === 'production'
@@ -10,8 +11,22 @@ export const fetchIdeas = async () => {
 };
 
 export const createIdea = async (idea) => {
-    const response = await axios.post(`${API_URL}/ideas`, idea);
-    return response.data;
+    try {
+        const user = JSON.parse(localStorage.getItem('user'));
+        const simplifiedUser = {
+            _id: user._id,
+            fullName: user.fullName,
+            type: user.type
+        };
+
+        const response = await axios.post(`${API_URL}/ideas`, { ...idea, user: simplifiedUser });
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.data.errors) {
+            throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
+        }
+        throw new Error('Failed to create idea');
+    }
 };
 
 export const getUserAchievements = async (userId) => {
@@ -24,11 +39,9 @@ export const getUserAchievements = async (userId) => {
     }
 };
 
-
 export const getUserIdeas = async (userId) => {
     try {
         const response = await axios.get(`${API_URL}/users/${userId}/ideas`);
-        console.log('Fetched user ideas:', response.data); // Log the response data
         return response.data;
     } catch (error) {
         console.error('Error fetching user ideas', error);
@@ -51,7 +64,7 @@ export const likeIdea = async (ideaId, userId) => {
         const response = await axios.post(`${API_URL}/ideas/${ideaId}/like`, { userId });
         return response.data;
     } catch (error) {
-        console.error('Error liking idea', error);
+        console.error('Error liking idea:', error);
         throw error;
     }
 };
@@ -61,8 +74,10 @@ export const loginUser = async (credentials) => {
         const response = await axios.post(`${API_URL}/users/login`, credentials);
         return response.data;
     } catch (error) {
-        console.error('Error logging in', error);
-        throw error;
+        if (error.response && error.response.data.errors) {
+            throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
+        }
+        throw new Error('Failed to login');
     }
 };
 
@@ -71,7 +86,9 @@ export const registerUser = async (userData) => {
         const response = await axios.post(`${API_URL}/users/register`, userData);
         return response.data;
     } catch (error) {
-        console.error('Error registering user', error);
-        throw error;
+        if (error.response && error.response.data.errors) {
+            throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
+        }
+        throw new Error('Failed to register user');
     }
 };

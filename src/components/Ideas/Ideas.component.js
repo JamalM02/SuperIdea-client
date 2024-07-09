@@ -1,3 +1,4 @@
+// components/Ideas/Ideas.component.js
 import React, { useState, useEffect } from 'react';
 import { fetchIdeas, createIdea, likeIdea } from '../../services/api.service';
 import { toast } from 'react-toastify';
@@ -61,7 +62,11 @@ function Ideas() {
         const newIdea = {
             title,
             description,
-            user,
+            user: {
+                _id: user._id,
+                fullName: user.fullName,
+                type: user.type
+            },
         };
 
         try {

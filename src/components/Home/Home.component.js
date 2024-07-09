@@ -54,11 +54,11 @@ function HomeComponent() {
                             <tbody>
                             <tr>
                                 <td>Students</td>
-                                <td>{report.studentIdeasCount}</td>
+                                <td>{report.totalStudentIdeas}</td>
                             </tr>
                             <tr>
                                 <td>Teachers</td>
-                                <td>{report.teacherIdeasCount}</td>
+                                <td>{report.totalTeacherIdeas}</td>
                             </tr>
                             </tbody>
                         </table>
