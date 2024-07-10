@@ -9,6 +9,7 @@ export const fetchIdeas = async () => {
     return response.data;
 };
 
+
 export const createIdea = async (idea, files) => {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
