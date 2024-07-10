@@ -31,6 +31,8 @@ function Ideas() {
     const [remainingDescriptionChars, setRemainingDescriptionChars] = useState(DESCRIPTION_CHARACTER_LIMIT);
     const [loadingIdeas, setLoadingIdeas] = useState(false);
     const [errorIdeas, setErrorIdeas] = useState(null);
+    const [loadingLikes, setLoadingLikes] = useState({});
+
 
     useEffect(() => {
         const fetchAllIdeas = async () => {
@@ -105,14 +107,67 @@ function Ideas() {
 
     const handleLike = async (ideaId) => {
         const user = JSON.parse(localStorage.getItem('user'));
+
+        // Set loading state for the specific idea
+        setLoadingLikes(prevLoadingLikes => ({ ...prevLoadingLikes, [ideaId]: true }));
+
+        // Optimistically update the UI
+        setIdeas(prevIdeas => {
+            return prevIdeas.map(idea => {
+                if (idea._id === ideaId) {
+                    const alreadyLiked = idea.likes.some(like => like._id === user._id);
+                    if (alreadyLiked) {
+                        return {
+                            ...idea,
+                            likes: idea.likes.filter(like => like._id !== user._id),
+                            likesCount: idea.likesCount - 1
+                        };
+                    } else {
+                        return {
+                            ...idea,
+                            likes: [...idea.likes, { _id: user._id, fullName: user.fullName, type: user.type }],
+                            likesCount: idea.likesCount + 1
+                        };
+                    }
+                }
+                return idea;
+            });
+        });
+
         try {
             const updatedIdea = await likeIdea(ideaId, user._id);
-            setIdeas(ideas.map(idea => idea._id === ideaId ? updatedIdea : idea));
+            setIdeas(prevIdeas => prevIdeas.map(idea => idea._id === ideaId ? updatedIdea : idea));
         } catch (error) {
             console.error('Error liking idea:', error);
+            // Revert the optimistic update on error
+            setIdeas(prevIdeas => {
+                return prevIdeas.map(idea => {
+                    if (idea._id === ideaId) {
+                        const alreadyLiked = idea.likes.some(like => like._id === user._id);
+                        if (alreadyLiked) {
+                            return {
+                                ...idea,
+                                likes: idea.likes.filter(like => like._id !== user._id),
+                                likesCount: idea.likesCount - 1
+                            };
+                        } else {
+                            return {
+                                ...idea,
+                                likes: [...idea.likes, { _id: user._id, fullName: user.fullName, type: user.type }],
+                                likesCount: idea.likesCount + 1
+                            };
+                        }
+                    }
+                    return idea;
+                });
+            });
             alert('Failed to like/unlike idea');
+        } finally {
+            // Remove loading state
+            setLoadingLikes(prevLoadingLikes => ({ ...prevLoadingLikes, [ideaId]: false }));
         }
     };
+
 
     const handleShowLikes = (event, likes) => {
         setShowLikes(likes);
@@ -209,8 +264,8 @@ function Ideas() {
                         <div key={idea._id} className="idea-bubble">
                             <div className="creator">{`${idea.user.fullName} (${idea.user.type})`}
                                 <span className="post-time">
-                                    {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
-                                </span>
+                                {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
+                            </span>
                             </div>
                             <div className="description">{idea.description}</div>
                             <div className="files">
@@ -221,15 +276,19 @@ function Ideas() {
                                 ))}
                             </div>
                             <div className="actions">
-                                <Button onClick={() => handleLike(idea._id)} variant="outline-success">
+                                <Button
+                                    onClick={() => handleLike(idea._id)}
+                                    variant="outline-success"
+                                    disabled={loadingLikes[idea._id]}
+                                >
                                     {idea.likes.some(like => like._id === JSON.parse(localStorage.getItem('user'))._id) ? 'Unlike' : 'Like'}
                                 </Button>
                                 <span
                                     className="likes-counter"
                                     onClick={(e) => handleShowLikes(e, idea.likes)}
                                 >
-                                    {idea.likes.length}
-                                </span>
+                                {idea.likes.length}
+                            </span>
                             </div>
                         </div>
                     ))
@@ -266,6 +325,7 @@ function Ideas() {
             )}
         </div>
     );
+
 }
 
 export default Ideas;
