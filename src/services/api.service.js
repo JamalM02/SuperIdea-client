@@ -10,6 +10,7 @@ export const fetchIdeas = async () => {
 };
 
 
+
 export const createIdea = async (idea, files) => {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
