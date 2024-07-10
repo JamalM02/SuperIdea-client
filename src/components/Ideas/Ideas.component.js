@@ -132,6 +132,11 @@ function Ideas() {
         setShowModal(false);
     };
 
+    const handleDownload = (fileId) => {
+        const url = `${process.env.REACT_APP_API_URL}/ideas/files/${fileId}`;
+        window.open(url, '_blank');
+    };
+
     return (
         <div className="ideas-container">
             <div className="page-title-container">
@@ -204,8 +209,8 @@ function Ideas() {
                             <div className="description">{idea.description}</div>
                             <div className="files">
                                 {idea.files.map(file => (
-                                    <div key={file.fileUrl}>
-                                        <a href={file.fileUrl} target="_blank" rel="noopener noreferrer" download={file.fileName}>{file.fileName}</a>
+                                    <div key={file._id}>
+                                        <button onClick={() => handleDownload(file._id)}>{file.fileName}</button>
                                     </div>
                                 ))}
                             </div>

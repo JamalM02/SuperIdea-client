@@ -36,6 +36,7 @@ export const createIdea = async (idea, files) => {
         });
         return response.data;
     } catch (error) {
+        console.error('Error in createIdea:', error);
         if (error.response && error.response.data.errors) {
             throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
         }
