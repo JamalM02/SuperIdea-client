@@ -22,7 +22,7 @@
 
 .custom-modal .modal-body {
     padding: 20px;
-    text-align: center;
+    text-align: left;
     max-height: 320px; /* Adjust this value as needed */
     overflow-y: auto; /* Add scroll */
 }

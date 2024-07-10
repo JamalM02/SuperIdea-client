@@ -75,11 +75,11 @@ body, html {
 }
 
 .description {
-    white-space: pre-wrap; /* Preserve whitespace and ensure line breaks */
-    word-wrap: break-word; /* Ensure long words break into the next line */
-    overflow-wrap: break-word; /* Ensure long words break into the next line */
-    width: 89%; /* Ensure the description takes up the full width */
-    margin-bottom: 15%; /* Ensure enough space for the actions */
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    width: 89%;
+    margin-bottom: 40px;
 }
 
 
@@ -120,17 +120,13 @@ body, html {
 
 .files-and-action {
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
-    margin-top: 15px;
 }
 
 .files {
     display: flex;
-    overflow-x: auto;
-    white-space: nowrap;
-    gap: 15px;
-    padding: 10px 0;
+    flex-wrap: nowrap;
     border-radius: 10px;
 }
 
@@ -140,6 +136,7 @@ body, html {
     align-items: center;
     text-align: center;
     width: 100px;
+    margin: 5px;
 }
 
 .file-button {
@@ -161,12 +158,14 @@ body, html {
 .file-name {
     font-size: 0.9em;
     color: #000;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
+    word-wrap: break-word;
+    white-space: normal;
 }
 
+.file-count {
+    font-size: 0.95em;
+    color: #555;
+}
 .actions {
     display: flex;
     flex-direction: column;
@@ -190,4 +189,3 @@ body, html {
 .input-error {
     border: 2px solid red;
 }
-

@@ -107,3 +107,8 @@ export const registerUser = async (userData) => {
         throw new Error('Failed to register user');
     }
 };
+
+export const fetchZipContents = async (fileId) => {
+    const response = await axios.get(`${API_URL}/ideas/files/${fileId}/contents`);
+    return response.data;
+};

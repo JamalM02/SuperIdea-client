@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { fetchIdeas, createIdea, likeIdea } from '../../services/api.service';
+import { fetchIdeas, createIdea, likeIdea, fetchZipContents } from '../../services/api.service';
 import { toast } from 'react-toastify';
 import { Modal, Button, Tooltip, Overlay, Spinner } from 'react-bootstrap';
 import './Ideas.component.css';
 import '../Style/ModalStyle.component.css';
 import { formatDistanceToNow } from 'date-fns/esm';
 import FileUploadModal from '../Style/FileUploadModal';
+import FileContentsModal from '../Style/FileContentsModal';
 
 const DESCRIPTION_CHARACTER_LIMIT = 300;
-const TITLE_CHARACTER_LIMIT = 30;
+const TITLE_CHARACTER_LIMIT = 20;
 const MAX_FILE_COUNT = 9;
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
@@ -57,8 +58,8 @@ function Ideas() {
     const [errorIdeas, setErrorIdeas] = useState(null);
     const [loadingLikes, setLoadingLikes] = useState({});
     const [loadingSubmit, setLoadingSubmit] = useState(false);
-    const [isTitleEmpty, setIsTitleEmpty] = useState(false);
-    const [isDescriptionEmpty, setIsDescriptionEmpty] = useState(false);
+    const [showFileContentsModal, setShowFileContentsModal] = useState(false);
+    const [fileContents, setFileContents] = useState([]);
 
     useEffect(() => {
         const fetchAllIdeas = async () => {
@@ -80,13 +81,7 @@ function Ideas() {
     }, []);
 
     const handleAddIdea = async () => {
-        const isTitleValid = title.trim() !== '';
-        const isDescriptionValid = description.trim() !== '';
-
-        setIsTitleEmpty(!isTitleValid);
-        setIsDescriptionEmpty(!isDescriptionValid);
-
-        if (!isTitleValid || !isDescriptionValid) {
+        if (title.trim() === '' || description.trim() === '') {
             toast.warning('Title and description are required');
             return;
         }
@@ -121,10 +116,8 @@ function Ideas() {
         }
     };
 
-
     const handleTitleChange = (e) => {
         const newTitle = e.target.value;
-        setIsTitleEmpty(newTitle.trim() === '');
         if (newTitle.length <= TITLE_CHARACTER_LIMIT) {
             setTitle(newTitle);
             setRemainingTitleChars(TITLE_CHARACTER_LIMIT - newTitle.length);
@@ -133,13 +126,11 @@ function Ideas() {
 
     const handleDescriptionChange = (e) => {
         const newDescription = e.target.value;
-        setIsDescriptionEmpty(newDescription.trim() === '');
         if (newDescription.length <= DESCRIPTION_CHARACTER_LIMIT) {
             setDescription(newDescription);
             setRemainingDescriptionChars(DESCRIPTION_CHARACTER_LIMIT - newDescription.length);
         }
     };
-
 
     const handleFileUpload = (uploadedFiles) => {
         setFiles(uploadedFiles);
@@ -149,10 +140,8 @@ function Ideas() {
     const handleLike = async (ideaId) => {
         const user = JSON.parse(localStorage.getItem('user'));
 
-        // Set loading state for the specific idea
         setLoadingLikes(prevLoadingLikes => ({ ...prevLoadingLikes, [ideaId]: true }));
 
-        // Optimistically update the UI
         setIdeas(prevIdeas => {
             return prevIdeas.map(idea => {
                 if (idea._id === ideaId) {
@@ -180,7 +169,6 @@ function Ideas() {
             setIdeas(prevIdeas => prevIdeas.map(idea => idea._id === ideaId ? updatedIdea : idea));
         } catch (error) {
             console.error('Error liking idea:', error);
-            // Revert the optimistic update on error
             setIdeas(prevIdeas => {
                 return prevIdeas.map(idea => {
                     if (idea._id === ideaId) {
@@ -204,7 +192,6 @@ function Ideas() {
             });
             alert('Failed to like/unlike idea');
         } finally {
-            // Remove loading state
             setLoadingLikes(prevLoadingLikes => ({ ...prevLoadingLikes, [ideaId]: false }));
         }
     };
@@ -235,6 +222,22 @@ function Ideas() {
         }
         const url = `${apiUrl}/ideas/files/${fileId}`;
         window.open(url, '_blank');
+    };
+
+    const handleViewContents = async (fileId) => {
+        try {
+            const fileContents = await fetchZipContents(fileId);
+            setFileContents(fileContents);
+            setShowFileContentsModal(true);
+        } catch (error) {
+            console.error('Error fetching ZIP file contents:', error);
+            alert('Failed to fetch ZIP file contents');
+        }
+    };
+
+    const handleCloseFileContentsModal = () => {
+        setShowFileContentsModal(false);
+        setFileContents([]);
     };
 
     return (
@@ -276,7 +279,7 @@ function Ideas() {
                             {remainingDescriptionChars} characters remaining
                         </small>
                     </div>
-                    <Button onClick={() => setShowFileUploadModal(true)}>Upload Files</Button>
+                    <Button className="upload-button" onClick={() => setShowFileUploadModal(true)}>Upload Files</Button>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>
@@ -309,32 +312,40 @@ function Ideas() {
                             </div>
                             <div className="description">{idea.description}</div>
                             <div className="files-and-action">
-                            <div className="files">
-                                {idea.files.map(file => (
-                                    <div key={file._id} className="file-item">
-                                        <button onClick={() => handleDownload(file._id)} className="file-button">
-                                            <img src={getFileIcon(file.fileName)} alt="File Icon" className="file-icon"/>
-                                            <div className="file-name">{file.fileName}</div>
-                                        </button>
-                                    </div>
-                                ))}
+                                <div className="files">
+                                    {idea.files.map(file => (
+                                        <div key={file._id} className="file-item">
+                                            <button onClick={() => handleDownload(file._id)} className="file-button">
+                                                <img src={getFileIcon(file.fileName)} alt="File Icon" className="file-icon"/>
+                                                <div className="file-name">
+                                                    {file.fileName}
+                                                </div>
+                                            </button>
+                                            <div className="file-count">
+                                                {`(${file.fileCount} files)`}
+                                            </div>
+                                            <Button variant="link" onClick={() => handleViewContents(file._id)}>
+                                                View Contents
+                                            </Button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="actions">
+                                    <Button
+                                        onClick={() => handleLike(idea._id)}
+                                        variant="outline-success"
+                                        disabled={loadingLikes[idea._id]}
+                                    >
+                                        {idea.likes.some(like => like._id === JSON.parse(localStorage.getItem('user'))._id) ? 'Unlike' : 'Like'}
+                                    </Button>
+                                    <span
+                                        className="likes-counter"
+                                        onClick={(e) => handleShowLikes(e, idea.likes)}
+                                    >
+                                        {idea.likes.length}
+                                    </span>
+                                </div>
                             </div>
-                            <div className="actions">
-                                <Button
-                                    onClick={() => handleLike(idea._id)}
-                                    variant="outline-success"
-                                    disabled={loadingLikes[idea._id]}
-                                >
-                                    {idea.likes.some(like => like._id === JSON.parse(localStorage.getItem('user'))._id) ? 'Unlike' : 'Like'}
-                                </Button>
-                                <span
-                                    className="likes-counter"
-                                    onClick={(e) => handleShowLikes(e, idea.likes)}
-                                >
-                                    {idea.likes.length}
-                                </span>
-                            </div>
-                        </div>
                         </div>
                     ))
                 ) : (
@@ -368,6 +379,12 @@ function Ideas() {
                     </Modal.Footer>
                 </Modal>
             )}
+
+            <FileContentsModal
+                show={showFileContentsModal}
+                handleClose={handleCloseFileContentsModal}
+                fileContents={fileContents}
+            />
         </div>
     );
 }
