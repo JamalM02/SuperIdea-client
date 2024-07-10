@@ -1,4 +1,3 @@
-// services/api.service.js
 import axios from 'axios';
 
 const API_URL = process.env.NODE_ENV === 'production'
@@ -10,7 +9,7 @@ export const fetchIdeas = async () => {
     return response.data;
 };
 
-export const createIdea = async (idea) => {
+export const createIdea = async (idea, files) => {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
         const simplifiedUser = {
@@ -19,7 +18,20 @@ export const createIdea = async (idea) => {
             type: user.type
         };
 
-        const response = await axios.post(`${API_URL}/ideas`, { ...idea, user: simplifiedUser });
+        const formData = new FormData();
+        formData.append('title', idea.title);
+        formData.append('description', idea.description);
+        formData.append('user', JSON.stringify(simplifiedUser));
+
+        files.forEach(file => {
+            formData.append('files', file);
+        });
+
+        const response = await axios.post(`${API_URL}/ideas`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return response.data;
     } catch (error) {
         if (error.response && error.response.data.errors) {

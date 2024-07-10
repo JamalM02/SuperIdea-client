@@ -1,4 +1,3 @@
-// components/Ideas/Ideas.component.js
 import React, { useState, useEffect } from 'react';
 import { fetchIdeas, createIdea, likeIdea } from '../../services/api.service';
 import { toast } from 'react-toastify';
@@ -24,6 +23,7 @@ function Ideas() {
     const [ideas, setIdeas] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
+    const [files, setFiles] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [showLikes, setShowLikes] = useState(null);
     const [target, setTarget] = useState(null);
@@ -70,7 +70,7 @@ function Ideas() {
         };
 
         try {
-            await createIdea(newIdea);
+            await createIdea(newIdea, files);
             resetForm();
             setShowModal(false);
             let updatedIdeas = await retry(fetchIdeas);
@@ -99,6 +99,10 @@ function Ideas() {
         }
     };
 
+    const handleFileChange = (e) => {
+        setFiles(Array.from(e.target.files));
+    };
+
     const handleLike = async (ideaId) => {
         const user = JSON.parse(localStorage.getItem('user'));
         try {
@@ -118,6 +122,7 @@ function Ideas() {
     const resetForm = () => {
         setTitle('');
         setDescription('');
+        setFiles([]);
         setRemainingTitleChars(TITLE_CHARACTER_LIMIT);
         setRemainingDescriptionChars(DESCRIPTION_CHARACTER_LIMIT);
     };
@@ -165,6 +170,12 @@ function Ideas() {
                         <small className="char-reminder">
                             {remainingDescriptionChars} characters remaining
                         </small>
+                        <input
+                            type="file"
+                            multiple
+                            onChange={handleFileChange}
+                            className="form-control mb-2"
+                        />
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -191,6 +202,13 @@ function Ideas() {
                                 </span>
                             </div>
                             <div className="description">{idea.description}</div>
+                            <div className="files">
+                                {idea.files.map(file => (
+                                    <div key={file.fileUrl}>
+                                        <a href={file.fileUrl} target="_blank" rel="noopener noreferrer" download={file.fileName}>{file.fileName}</a>
+                                    </div>
+                                ))}
+                            </div>
                             <div className="actions">
                                 <Button onClick={() => handleLike(idea._id)} variant="outline-success">
                                     {idea.likes.some(like => like._id === JSON.parse(localStorage.getItem('user'))._id) ? 'Unlike' : 'Like'}
