@@ -32,3 +32,4 @@ package-lock.json
 node_modules
 .gitignore
 .env
+/inspectionProfiles/Project_Default.xml

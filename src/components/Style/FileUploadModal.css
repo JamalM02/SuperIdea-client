@@ -1,0 +1,31 @@
+.dropzone {
+    border: 2px dashed #cccccc;
+    border-radius: 5px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.error {
+    color: red;
+}
+
+.file-list {
+    margin-top: 10px;
+}
+
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.file-item button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: red;
+    font-weight: bold;
+}

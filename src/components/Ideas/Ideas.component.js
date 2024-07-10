@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { fetchIdeas, createIdea, likeIdea } from '../../services/api.service';
 import { toast } from 'react-toastify';
-import { Modal, Button, Tooltip, Overlay } from 'react-bootstrap';
+import { Modal, Button, Tooltip, Overlay, Spinner } from 'react-bootstrap';
 import './Ideas.component.css';
 import '../Style/ModalStyle.component.css';
 import { formatDistanceToNow } from 'date-fns/esm';
+import FileUploadModal from '../Style/FileUploadModal';
 
 const DESCRIPTION_CHARACTER_LIMIT = 300;
 const TITLE_CHARACTER_LIMIT = 30;
+const MAX_FILE_COUNT = 9;
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
@@ -19,12 +21,34 @@ const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     }
 };
 
+const getFileIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    switch (extension) {
+        case 'pdf':
+            return '/pdf-icon.png';
+        case 'doc':
+        case 'docx':
+            return '/word-icon.png';
+        case 'xls':
+        case 'xlsx':
+            return '/excel-icon.png';
+        case 'jpg':
+        case 'jpeg':
+        case 'png':
+        case 'gif':
+            return '/image-icon.png';
+        default:
+            return '/file-icon.png';
+    }
+};
+
 function Ideas() {
     const [ideas, setIdeas] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [files, setFiles] = useState([]);
     const [showModal, setShowModal] = useState(false);
+    const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const [showLikes, setShowLikes] = useState(null);
     const [target, setTarget] = useState(null);
     const [remainingTitleChars, setRemainingTitleChars] = useState(TITLE_CHARACTER_LIMIT);
@@ -32,7 +56,9 @@ function Ideas() {
     const [loadingIdeas, setLoadingIdeas] = useState(false);
     const [errorIdeas, setErrorIdeas] = useState(null);
     const [loadingLikes, setLoadingLikes] = useState({});
-
+    const [loadingSubmit, setLoadingSubmit] = useState(false);
+    const [isTitleEmpty, setIsTitleEmpty] = useState(false);
+    const [isDescriptionEmpty, setIsDescriptionEmpty] = useState(false);
 
     useEffect(() => {
         const fetchAllIdeas = async () => {
@@ -54,8 +80,14 @@ function Ideas() {
     }, []);
 
     const handleAddIdea = async () => {
-        if (title.trim() === '' || description.trim() === '') {
-            alert('Title and description are required');
+        const isTitleValid = title.trim() !== '';
+        const isDescriptionValid = description.trim() !== '';
+
+        setIsTitleEmpty(!isTitleValid);
+        setIsDescriptionEmpty(!isDescriptionValid);
+
+        if (!isTitleValid || !isDescriptionValid) {
+            toast.warning('Title and description are required');
             return;
         }
 
@@ -71,6 +103,8 @@ function Ideas() {
             },
         };
 
+        setLoadingSubmit(true);
+
         try {
             await createIdea(newIdea, files);
             resetForm();
@@ -82,11 +116,15 @@ function Ideas() {
         } catch (error) {
             console.error('Error creating idea:', error);
             alert('Failed to create idea');
+        } finally {
+            setLoadingSubmit(false);
         }
     };
 
+
     const handleTitleChange = (e) => {
         const newTitle = e.target.value;
+        setIsTitleEmpty(newTitle.trim() === '');
         if (newTitle.length <= TITLE_CHARACTER_LIMIT) {
             setTitle(newTitle);
             setRemainingTitleChars(TITLE_CHARACTER_LIMIT - newTitle.length);
@@ -95,14 +133,17 @@ function Ideas() {
 
     const handleDescriptionChange = (e) => {
         const newDescription = e.target.value;
+        setIsDescriptionEmpty(newDescription.trim() === '');
         if (newDescription.length <= DESCRIPTION_CHARACTER_LIMIT) {
             setDescription(newDescription);
             setRemainingDescriptionChars(DESCRIPTION_CHARACTER_LIMIT - newDescription.length);
         }
     };
 
-    const handleFileChange = (e) => {
-        setFiles(Array.from(e.target.files));
+
+    const handleFileUpload = (uploadedFiles) => {
+        setFiles(uploadedFiles);
+        setShowFileUploadModal(false);
     };
 
     const handleLike = async (ideaId) => {
@@ -168,7 +209,6 @@ function Ideas() {
         }
     };
 
-
     const handleShowLikes = (event, likes) => {
         setShowLikes(likes);
         setTarget(event.target);
@@ -196,7 +236,6 @@ function Ideas() {
         const url = `${apiUrl}/ideas/files/${fileId}`;
         window.open(url, '_blank');
     };
-
 
     return (
         <div className="ideas-container">
@@ -236,23 +275,24 @@ function Ideas() {
                         <small className="char-reminder">
                             {remainingDescriptionChars} characters remaining
                         </small>
-                        <input
-                            type="file"
-                            multiple
-                            onChange={handleFileChange}
-                            className="form-control mb-2"
-                        />
                     </div>
+                    <Button onClick={() => setShowFileUploadModal(true)}>Upload Files</Button>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>
                         Cancel
                     </Button>
-                    <Button variant="success" onClick={handleAddIdea}>
-                        Submit
+                    <Button variant="success" onClick={handleAddIdea} disabled={loadingSubmit}>
+                        {loadingSubmit ? <Spinner animation="border" size="sm" /> : 'Submit'}
                     </Button>
                 </Modal.Footer>
             </Modal>
+
+            <FileUploadModal
+                show={showFileUploadModal}
+                handleClose={() => setShowFileUploadModal(false)}
+                handleFilesSubmit={handleFileUpload}
+            />
 
             <div className="ideas-list">
                 {loadingIdeas ? (
@@ -264,14 +304,18 @@ function Ideas() {
                         <div key={idea._id} className="idea-bubble">
                             <div className="creator">{`${idea.user.fullName} (${idea.user.type})`}
                                 <span className="post-time">
-                                {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
-                            </span>
+                                    {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
+                                </span>
                             </div>
                             <div className="description">{idea.description}</div>
+                            <div className="files-and-action">
                             <div className="files">
                                 {idea.files.map(file => (
-                                    <div key={file._id}>
-                                        <button onClick={() => handleDownload(file._id)}>{file.fileName}</button>
+                                    <div key={file._id} className="file-item">
+                                        <button onClick={() => handleDownload(file._id)} className="file-button">
+                                            <img src={getFileIcon(file.fileName)} alt="File Icon" className="file-icon"/>
+                                            <div className="file-name">{file.fileName}</div>
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -287,9 +331,10 @@ function Ideas() {
                                     className="likes-counter"
                                     onClick={(e) => handleShowLikes(e, idea.likes)}
                                 >
-                                {idea.likes.length}
-                            </span>
+                                    {idea.likes.length}
+                                </span>
                             </div>
+                        </div>
                         </div>
                     ))
                 ) : (
@@ -325,7 +370,6 @@ function Ideas() {
             )}
         </div>
     );
-
 }
 
 export default Ideas;
