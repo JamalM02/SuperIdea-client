@@ -133,9 +133,15 @@ function Ideas() {
     };
 
     const handleDownload = (fileId) => {
-        const url = `${process.env.REACT_APP_API_URL}/ideas/files/${fileId}`;
+        const apiUrl = process.env.REACT_APP_API_URL_PROD || process.env.REACT_APP_API_URL_DEV;
+        if (!apiUrl) {
+            console.error("REACT_APP_API_URL is not defined");
+            return;
+        }
+        const url = `${apiUrl}/ideas/files/${fileId}`;
         window.open(url, '_blank');
     };
+
 
     return (
         <div className="ideas-container">
