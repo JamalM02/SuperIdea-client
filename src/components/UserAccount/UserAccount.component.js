@@ -91,7 +91,7 @@ function UserAccountComponent({ user }) {
         setErrorTopContributors(null);
         try {
             const response = await retry(fetchTopContributors);
-            setTopContributors(response);
+            setTopContributors(response.filter(contributor => contributor.totalIdeas > 0));
         } catch (error) {
             console.error('Failed to fetch top contributors', error);
             setErrorTopContributors('Failed to load top contributors');
