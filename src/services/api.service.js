@@ -112,3 +112,13 @@ export const fetchZipContents = async (fileId) => {
     const response = await axios.get(`${API_URL}/ideas/files/${fileId}/contents`);
     return response.data;
 };
+
+export const fetchTopContributors = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/users/top-contributors`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching top contributors', error);
+        throw error;
+    }
+};

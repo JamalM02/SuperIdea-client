@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserAchievements, getUserIdeas, getReport } from '../../services/api.service';
+import { getUserAchievements, getUserIdeas, getReport, fetchTopContributors } from '../../services/api.service';
 import { Modal, Button } from 'react-bootstrap';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
@@ -22,6 +22,9 @@ function UserAccountComponent({ user }) {
     const [report, setReport] = useState(null);
     const [showLikes, setShowLikes] = useState(null);
     const [showModal, setShowModal] = useState(false);
+    const [topContributors, setTopContributors] = useState([]);
+    const [loadingTopContributors, setLoadingTopContributors] = useState(false);
+    const [errorTopContributors, setErrorTopContributors] = useState(null);
 
     const [loadingAchievements, setLoadingAchievements] = useState(false);
     const [errorAchievements, setErrorAchievements] = useState(null);
@@ -38,6 +41,7 @@ function UserAccountComponent({ user }) {
             fetchUserIdeas(user._id);
         }
         fetchReport();
+        fetchTopContributorsData();
     }, [user]);
 
     const fetchAchievements = async (userId) => {
@@ -82,6 +86,20 @@ function UserAccountComponent({ user }) {
         }
     };
 
+    const fetchTopContributorsData = async () => {
+        setLoadingTopContributors(true);
+        setErrorTopContributors(null);
+        try {
+            const response = await retry(fetchTopContributors);
+            setTopContributors(response);
+        } catch (error) {
+            console.error('Failed to fetch top contributors', error);
+            setErrorTopContributors('Failed to load top contributors');
+        } finally {
+            setLoadingTopContributors(false);
+        }
+    };
+
     const handleShowLikes = (likes) => {
         setShowLikes(likes);
         setShowModal(true);
@@ -119,7 +137,6 @@ function UserAccountComponent({ user }) {
                     <ul className="user-achievements-list">
                         <li>Ideas submitted: {achievements.totalIdeas}</li>
                         <li>Ideas liked: {achievements.totalLikes}</li>
-                        <li>Top contributor: {achievements.topContributor ? 'Yes' : 'No'}</li>
                     </ul>
                 ) : null}
             </div>
@@ -143,7 +160,8 @@ function UserAccountComponent({ user }) {
                             {ideas.map((idea) => (
                                 <tr key={idea._id}>
                                     <td className="subject-field">{idea.title}</td>
-                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)} style={{ cursor: 'pointer' }}>
+                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)}
+                                        style={{cursor: 'pointer'}}>
                                         {idea.likesCount}
                                     </td>
                                 </tr>
@@ -152,6 +170,40 @@ function UserAccountComponent({ user }) {
                         </table>
                     ) : (
                         <p>No ideas to display.</p>
+                    )}
+                </div>
+            </div>
+
+            <div className="top-contributors">
+                <div className="user-reports-title">   Top 3 Contributors 🏆 </div>
+                <div className="top-contributors-table-wrapper">
+                    {loadingTopContributors ? (
+                        <p className="loading">Loading top contributors...</p>
+                    ) : errorTopContributors ? (
+                        <p className="error">{errorTopContributors}</p>
+                    ) : topContributors.length > 0 ? (
+                        <table className="user-reports-table">
+                            <thead className="user-reports-thead">
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Likes</th>
+                                <th>Ideas</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {topContributors.map(contributor => (
+                                <tr key={contributor._id}>
+                                    <td>{contributor.fullName}</td>
+                                    <td>{contributor.type}</td>
+                                    <td>{contributor.totalLikes}</td>
+                                    <td>{contributor.totalIdeas}</td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <p>No contributors to display.</p>
                     )}
                 </div>
             </div>

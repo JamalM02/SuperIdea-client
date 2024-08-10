@@ -38,7 +38,6 @@
 .btn-outline-primary {
     --bs-btn-color: #0e0f10;
     background: white;
-
 }
 
 .user-page-subtitle {
@@ -50,7 +49,8 @@
 
 .user-achievements,
 .user-ideas,
-.user-reports {
+.user-reports,
+.top-contributors {
     margin-top: 40px;
     background: rgba(187, 209, 235, 0.91);
     padding: 20px;
@@ -86,7 +86,8 @@
 }
 
 .user-ideas-table-wrapper,
-.user-reports-table-wrapper {
+.user-reports-table-wrapper,
+.top-contributors-table-wrapper {
     max-height: 250px;
     overflow-y: auto;
     margin-top: 30px;
@@ -149,4 +150,10 @@
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.top-contributors-list {
+    color: rgb(209, 211, 216);
+    padding: 10px;
+    text-align: left;
 }
