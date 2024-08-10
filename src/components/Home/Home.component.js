@@ -26,9 +26,9 @@ function HomeComponent() {
                 <img className="home-logo" src={logo} alt="SuperIdea Logo"/>
             </div>
             <div className="home-content-container">
-                <h1 className="home-title">Welcome to SuperIdea!</h1>
+                <h1 className="home-title">Welcome to<br/> ScholarShareNet!</h1>
                 <div className="home-log-content-container">
-                    <p className="home-log-description">Got a great idea?!</p>
+                    <p className="home-log-description">Got a great Summary Materials?!</p>
                     <div className="home-log-login-register-container">
                         <Link to="/login" className="home-login-container">
                             <div className="home-login-link">Sign in</div>
@@ -48,7 +48,7 @@ function HomeComponent() {
                             <thead className="home-reports-thead">
                             <tr>
                                 <th>Role</th>
-                                <th>Ideas Count</th>
+                                <th>Posts</th>
                             </tr>
                             </thead>
                             <tbody>

@@ -95,7 +95,7 @@ function App() {
   return (
       <div className="App">
         <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-          <span className="navbar-brand">SuperIdea</span>
+          <span className="navbar-brand">ScholarShareNet</span>
           <button
               className="navbar-toggler"
               type="button"

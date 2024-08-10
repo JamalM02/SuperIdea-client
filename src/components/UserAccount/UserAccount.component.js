@@ -114,52 +114,55 @@ function UserAccountComponent({ user }) {
         <div className="user-account-wrapper">
             <div className="user-page-title-container">
                 <div className="user-title-subtitle-container">
-                    <div className="user-page-title">{user ? user.fullName : 'Loading...'}</div>
+                    <div className="user-page-title">
+                        {user ? (
+                            <>
+                                {user.topContributor && <span role="img" aria-label="trophy">🏆</span>}
+                                {user.fullName}
+                            </>
+                        ) : 'Loading...'}
+                    </div>
                     <div className="user-page-subtitle">{user ? user.email : 'Loading...'}</div>
                 </div>
                 {user && (
                     <Link to="/ideas">
                         <div className="account-buttons">
                             <Button className="ideas-link-button">
-                                Lets add some ideas
+                                Lets add More! 📚
                             </Button>
                         </div>
                     </Link>
                 )}
             </div>
 
-            <div>
-                {loadingAchievements ? (
-                    <p className="loading">Loading achievements...</p>
-                ) : errorAchievements ? (
-                    <p className="error">{errorAchievements}</p>
-                ) : achievements ? (
-                    <ul className="user-achievements-list">
-                        <li>Ideas submitted: {achievements.totalIdeas}</li>
-                        <li>Ideas liked: {achievements.totalLikes}</li>
-                    </ul>
-                ) : null}
-            </div>
-
             <div className="user-ideas">
-                <div className="user-ideas-title">Your Ideas</div>
+                <div className="user-ideas-title">My Posts
+                    {loadingAchievements ? (
+                        <p className="loading">Loading achievements...</p>
+                    ) : errorAchievements ? (
+                        <p className="error">{errorAchievements}</p>
+                    ) : achievements ? (
+                        <p className="user-achievements">
+                            Posts: {achievements.totalIdeas}  likes: {achievements.totalLikes}
+                        </p>
+                    ) : null}</div>
                 <div className="user-ideas-table-wrapper">
                     {loadingIdeas ? (
-                        <p className="loading">Loading ideas...</p>
+                        <p className="loading">Loading posts...</p>
                     ) : errorIdeas ? (
                         <p className="error">{errorIdeas}</p>
                     ) : ideas.length > 0 ? (
                         <table className="user-ideas-table">
                             <thead className="user-ideas-thead">
                             <tr>
-                                <th>Title</th>
-                                <th>Likes Count</th>
+                                <th>Post's Subject</th>
+                                <th>Likes</th>
                             </tr>
                             </thead>
                             <tbody>
                             {ideas.map((idea) => (
                                 <tr key={idea._id}>
-                                    <td className="subject-field">{idea.title}</td>
+                                    <td className="subject-field">{idea.title} {idea.user && idea.user.topContributor ? '🏆' : ''}</td>
                                     <td className="like-click" onClick={() => handleShowLikes(idea.likes)}
                                         style={{cursor: 'pointer'}}>
                                         {idea.likesCount}
@@ -175,7 +178,7 @@ function UserAccountComponent({ user }) {
             </div>
 
             <div className="top-contributors">
-                <div className="user-reports-title">   Top 3 Contributors 🏆 </div>
+                <div className="user-reports-title">Top 3 Contributors 🏆</div>
                 <div className="top-contributors-table-wrapper">
                     {loadingTopContributors ? (
                         <p className="loading">Loading top contributors...</p>
@@ -188,7 +191,7 @@ function UserAccountComponent({ user }) {
                                 <th>Name</th>
                                 <th>Role</th>
                                 <th>Likes</th>
-                                <th>Ideas</th>
+                                <th>Posts</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -220,7 +223,7 @@ function UserAccountComponent({ user }) {
                             <thead className="user-reports-thead">
                             <tr>
                                 <th>Role</th>
-                                <th>Ideas Count</th>
+                                <th>Posts</th>
                             </tr>
                             </thead>
                             <tbody>

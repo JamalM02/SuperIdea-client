@@ -47,7 +47,11 @@
     text-align: center;
 }
 
-.user-achievements,
+.user-achievements{
+    font-size: 1.5rem;
+    color: black;
+}
+
 .user-ideas,
 .user-reports,
 .top-contributors {
@@ -58,9 +62,9 @@
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.user-achievements-title,
 .user-ideas-title,
-.user-reports-title {
+.user-reports-title,
+.top-contributors-title {
     height: 50px;
     margin-bottom: 15px;
     text-align: center;
@@ -71,30 +75,17 @@
     font-family: "Playwrite IT Moderna", cursive;
 }
 
-.user-achievements-list {
-    margin-top: 5px;
-    list-style: none;
-    padding: 0;
-    text-align: center;
-}
-
-.user-achievements-list li {
-    color: rgba(124, 222, 143, 0.8);
-    font-weight: bold;
-    margin-bottom: 5px;
-    font-size: 1.1rem;
-}
-
 .user-ideas-table-wrapper,
 .user-reports-table-wrapper,
 .top-contributors-table-wrapper {
     max-height: 250px;
     overflow-y: auto;
-    margin-top: 30px;
+    margin-top: 40px;
 }
 
 .user-ideas-table,
-.user-reports-table {
+.user-reports-table,
+.top-contributors-table {
     width: 97%;
     border-collapse: collapse;
     table-layout: fixed; /* Ensures that long words break properly */
@@ -103,7 +94,8 @@
 }
 
 .user-ideas-table th,
-.user-reports-table th {
+.user-reports-table th,
+.top-contributors-table th {
     padding: 10px;
     border: 2px solid rgba(1, 15, 31, 0.43);
     text-align: center;
@@ -115,7 +107,8 @@
 }
 
 .user-ideas-table td,
-.user-reports-table td {
+.user-reports-table td,
+.top-contributors-table td {
     color: black;
     padding: 10px;
     border: 2px solid rgba(1, 15, 31, 0.43);
@@ -125,7 +118,8 @@
 }
 
 .user-ideas-thead,
-.user-reports-thead {
+.user-reports-thead,
+.top-contributors-thead {
     background: rgba(33, 37, 41, 0.79);
     color: white;
 }
@@ -156,4 +150,10 @@
     color: rgb(209, 211, 216);
     padding: 10px;
     text-align: left;
+}
+
+.trophy-icon {
+    width: 20px;
+    height: 20px;
+    margin-left: 5px;
 }

@@ -244,8 +244,8 @@ function Ideas() {
         <div className="ideas-container">
             <div className="page-title-container">
                 <div className="title-subtitle-container">
-                    <div className="page-title">Ideas</div>
-                    <p className="page-subtitle">Share between all the students and teachers and bring new ideas to life!</p>
+                    <div className="page-title">Posts</div>
+                    <p className="page-subtitle">Share between all the students and teachers and contribute to the Students' Community!</p>
                 </div>
                 <Button onClick={() => setShowModal(true)} className="create-idea-button">
                     Create New Idea
@@ -254,7 +254,7 @@ function Ideas() {
 
             <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
                 <Modal.Header closeButton>
-                    <Modal.Title>Create New Idea</Modal.Title>
+                    <Modal.Title>New Post</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <div className="idea-form">
@@ -305,7 +305,9 @@ function Ideas() {
                 ) : ideas.length > 0 ? (
                     ideas.map((idea) => (
                         <div key={idea._id} className="idea-bubble">
-                            <div className="creator">{`${idea.user.fullName} (${idea.user.type})`}
+                            <div className="creator">
+                                {`${idea.user.fullName} (${idea.user.type})`}
+                                {idea.user.topContributor && <span role="img" aria-label="trophy">🏆</span>}
                                 <span className="post-time">
                                     {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
                                 </span>
