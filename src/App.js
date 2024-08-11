@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { BrowserRouter as Router, Route, Routes, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
+import { Route, Routes, Link, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import HomeComponent from './components/Home/Home.component';
 import Ideas from './components/Ideas/Ideas.component';
 import LoginComponent from './components/Login/Login.component';
@@ -161,12 +161,4 @@ function App() {
   );
 }
 
-function AppWrapper() {
-  return (
-      <Router>
-        <App />
-      </Router>
-  );
-}
-
-export default AppWrapper;
+export default App;

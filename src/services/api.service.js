@@ -9,7 +9,17 @@ export const fetchIdeas = async () => {
     return response.data;
 };
 
-
+export const loginUser = async (credentials) => {
+    try {
+        const response = await axios.post(`${API_URL}/users/login`, credentials);
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.data.errors) {
+            throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
+        }
+        throw new Error('Failed to login');
+    }
+};
 
 export const createIdea = async (idea, files) => {
     try {
@@ -84,17 +94,6 @@ export const likeIdea = async (ideaId, userId) => {
     }
 };
 
-export const loginUser = async (credentials) => {
-    try {
-        const response = await axios.post(`${API_URL}/users/login`, credentials);
-        return response.data;
-    } catch (error) {
-        if (error.response && error.response.data.errors) {
-            throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
-        }
-        throw new Error('Failed to login');
-    }
-};
 
 export const registerUser = async (userData) => {
     try {
