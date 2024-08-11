@@ -15,7 +15,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min';
 import './components/Style/ToastStyles.css';  // <-- Import custom toast styles
 import { io } from 'socket.io-client';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 const API_URL = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_PROD : process.env.REACT_APP_API_URL_DEV;
 const SOCKET_URL = API_URL.replace('/api', '');
@@ -94,73 +93,71 @@ function App() {
   ];
 
   return (
-      <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
-        <div className="App">
-          <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
-            <span className="navbar-brand">ScholarShareNet</span>
-            <button
-                className="navbar-toggler"
-                type="button"
-                aria-controls="navbarNav"
-                aria-expanded={!isNavbarCollapsed}
-                aria-label="Toggle navigation"
-                onClick={toggleNavbar}
-            >
-              <span className="navbar-toggler-icon"></span>
-            </button>
-            <div className={`collapse navbar-collapse ${isNavbarCollapsed ? '' : 'show'}`} id="navbarNav">
-              <ul className="navbar-nav me-auto">
-                {user ? (
-                    loggedInLinks.map(link => (
-                        <li className="nav-item" key={link.label}>
-                          {link.path ? (
-                              <Link className="nav-link" to={link.path}>{link.label}</Link>
-                          ) : (
-                              <span className="nav-link">{link.label}</span>
-                          )}
-                        </li>
-                    ))
-                ) : (
-                    <>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/home">Home</Link>
+      <div className="App">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark px-3">
+          <span className="navbar-brand">ScholarShareNet</span>
+          <button
+              className="navbar-toggler"
+              type="button"
+              aria-controls="navbarNav"
+              aria-expanded={!isNavbarCollapsed}
+              aria-label="Toggle navigation"
+              onClick={toggleNavbar}
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className={`collapse navbar-collapse ${isNavbarCollapsed ? '' : 'show'}`} id="navbarNav">
+            <ul className="navbar-nav me-auto">
+              {user ? (
+                  loggedInLinks.map(link => (
+                      <li className="nav-item" key={link.label}>
+                        {link.path ? (
+                            <Link className="nav-link" to={link.path}>{link.label}</Link>
+                        ) : (
+                            <span className="nav-link">{link.label}</span>
+                        )}
                       </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/our-team">Meet The Team</Link>
-                      </li>
-                      {location.pathname !== '/home' && (
-                          <li className="nav-item">
-                            <Link className="nav-link" to="/login">Sign in</Link>
-                          </li>
-                      )}
-                    </>
-                )}
-              </ul>
-              <ul className="navbar-nav ms-auto">
-                {user && (
+                  ))
+              ) : (
+                  <>
                     <li className="nav-item">
-                      <button className="btn btn-link nav-link" onClick={() => { handleLogout(); }}>Logout</button>
+                      <Link className="nav-link" to="/home">Home</Link>
                     </li>
-                )}
-              </ul>
-            </div>
-          </nav>
-          <div className="container mt-5">
-            <TransitionWrapperComponent location={location}>
-              <Routes location={location}>
-                <Route path="/home" element={<HomeComponent />} />
-                <Route path="/ideas" element={<PrivateRoute element={<Ideas />} />} />
-                <Route path="/login" element={<LoginComponent setUser={setUser} />} />
-                <Route path="/our-team" element={<OurTeamComponent />} />
-                <Route path="/register" element={<RegisterComponent />} />
-                <Route path="/user-account" element={<PrivateRoute element={<UserAccountComponent user={user} />} />} />
-                <Route path="/" element={<HomeComponent />} />
-              </Routes>
-            </TransitionWrapperComponent>
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/our-team">Meet The Team</Link>
+                    </li>
+                    {location.pathname !== '/home' && (
+                        <li className="nav-item">
+                          <Link className="nav-link" to="/login">Sign in</Link>
+                        </li>
+                    )}
+                  </>
+              )}
+            </ul>
+            <ul className="navbar-nav ms-auto">
+              {user && (
+                  <li className="nav-item">
+                    <button className="btn btn-link nav-link" onClick={() => { handleLogout(); }}>Logout</button>
+                  </li>
+              )}
+            </ul>
           </div>
-          <ToastContainer />
+        </nav>
+        <div className="container mt-5">
+          <TransitionWrapperComponent location={location}>
+            <Routes location={location}>
+              <Route path="/home" element={<HomeComponent />} />
+              <Route path="/ideas" element={<PrivateRoute element={<Ideas />} />} />
+              <Route path="/login" element={<LoginComponent setUser={setUser} />} />
+              <Route path="/our-team" element={<OurTeamComponent />} />
+              <Route path="/register" element={<RegisterComponent />} />
+              <Route path="/user-account" element={<PrivateRoute element={<UserAccountComponent user={user} />} />} />
+              <Route path="/" element={<HomeComponent />} />
+            </Routes>
+          </TransitionWrapperComponent>
         </div>
-      </GoogleOAuthProvider>
+        <ToastContainer />
+      </div>
   );
 }
 
