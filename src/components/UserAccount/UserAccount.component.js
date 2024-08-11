@@ -4,8 +4,10 @@ import { Modal, Button } from 'react-bootstrap';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
 import { Link } from "react-router-dom";
+import { io } from 'socket.io-client';
 
-// Retry function
+const socket = io(process.env.REACT_APP_API_URL_DEV);
+
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
         return await fn();
@@ -42,6 +44,17 @@ function UserAccountComponent({ user }) {
         }
         fetchReport();
         fetchTopContributorsData();
+
+        // Set up socket listener for like events
+        socket.on('likeIdea', () => {
+            if (user) {
+                fetchAchievements(user._id);
+            }
+        });
+
+        return () => {
+            socket.off('likeIdea');
+        };
     }, [user]);
 
     const fetchAchievements = async (userId) => {
@@ -117,7 +130,7 @@ function UserAccountComponent({ user }) {
                     <div className="user-page-title">
                         {user ? (
                             <>
-                                {user.topContributor && <span role="img" aria-label="trophy">🏆</span>}
+                                {user.topContributor===true && <span role="img" aria-label="trophy">🏆</span>}
                                 {user.fullName}
                             </>
                         ) : 'Loading...'}
@@ -145,7 +158,8 @@ function UserAccountComponent({ user }) {
                         <p className="user-achievements">
                             Posts: {achievements.totalIdeas}  likes: {achievements.totalLikes}
                         </p>
-                    ) : null}</div>
+                    ) : null}
+                </div>
                 <div className="user-ideas-table-wrapper">
                     {loadingIdeas ? (
                         <p className="loading">Loading posts...</p>
