@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import './Login.component.css';
-import { loginUser } from '../../services/api.service';
 import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { toast } from 'react-toastify';
+import { loginUser } from '../../services/api.service';
+import './Login.component.css';
 
 function LoginComponent({ setUser }) {
     const [email, setEmail] = useState('');
@@ -44,6 +45,15 @@ function LoginComponent({ setUser }) {
         }
     };
 
+    const handleGoogleLoginSuccess = (response) => {
+        window.location.href = `${process.env.REACT_APP_API_URL_DEV}/users/auth/google`;
+    };
+
+    const handleGoogleLoginFailure = (response) => {
+        console.error('Google Login Failed', response);
+        toast.error('Google login failed');
+    };
+
     return (
         <div className="login-container">
             <h3 className="login-heading">Welcome Back!</h3>
@@ -74,6 +84,10 @@ function LoginComponent({ setUser }) {
                 {passwordError && <div className="text-danger">{passwordError}</div>}
             </div>
             <button className="btn btn-primary login-btn" onClick={handleLogin}>Login</button>
+            <GoogleLogin
+                onSuccess={handleGoogleLoginSuccess}
+                onFailure={handleGoogleLoginFailure}
+            />
             <div className="login-register-link">
                 <small>
                     <a href="/register" className="text-muted">Don't have an account? Register</a>
