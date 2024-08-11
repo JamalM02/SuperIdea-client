@@ -45,8 +45,9 @@ function LoginComponent({ setUser }) {
     };
 
     const handleGoogleLogin = () => {
-        window.location.href = `${process.env.REACT_APP_API_URL_DEV}/users/auth/google`;
+        window.location.href = `${process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_PROD : process.env.REACT_APP_API_URL_DEV}/users/auth/google`;
     };
+
 
     return (
         <div className="login-container">
