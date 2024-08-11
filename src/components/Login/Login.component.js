@@ -44,11 +44,6 @@ function LoginComponent({ setUser }) {
         }
     };
 
-    const handleGoogleLogin = () => {
-        window.location.href = `${process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_PROD : process.env.REACT_APP_API_URL_DEV}/users/auth/google`;
-    };
-
-
     return (
         <div className="login-container">
             <h3 className="login-heading">Welcome Back!</h3>
@@ -79,7 +74,6 @@ function LoginComponent({ setUser }) {
                 {passwordError && <div className="text-danger">{passwordError}</div>}
             </div>
             <button className="btn btn-primary login-btn" onClick={handleLogin}>Login</button>
-            <button className="btn btn-danger login-btn" onClick={handleGoogleLogin}>Login with Google</button>
             <div className="login-register-link">
                 <small>
                     <a href="/register" className="text-muted">Don't have an account? Register</a>
