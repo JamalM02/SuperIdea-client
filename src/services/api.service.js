@@ -98,8 +98,10 @@ export const likeIdea = async (ideaId, userId) => {
 export const registerUser = async (userData) => {
     try {
         const response = await axios.post(`${API_URL}/users/register`, userData);
+        console.log("API Response:", response.data);
         return response.data;
     } catch (error) {
+        console.error("API Error:", error.response ? error.response.data : error.message);
         if (error.response && error.response.data.errors) {
             throw new Error(error.response.data.errors.map(err => err.msg).join(', '));
         }
@@ -130,4 +132,10 @@ export const checkUserExistence = async (userData) => {
         throw error.response.data;
     }
 };
+
+export const checkUserExistenceByEmail = async (email) => {
+    const response = await axios.post(`${API_URL}/users/checkExistence`, { email });
+    return response.data.exists;
+};
+
 

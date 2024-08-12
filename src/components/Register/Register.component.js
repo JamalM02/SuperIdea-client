@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './Register.component.css';
 import { registerUser, checkUserExistence } from '../../services/api.service';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import emailjs from 'emailjs-com';
 
@@ -19,7 +19,16 @@ function RegisterComponent() {
     const [canResend, setCanResend] = useState(false);
     const [isVerifyDisabled, setIsVerifyDisabled] = useState(true); // Disable verify button initially
     const navigate = useNavigate();
+    const location = useLocation();
     const timerRef = useRef(null);
+
+    useEffect(() => {
+        if (location.state) {
+            setEmail(location.state.email || '');
+            setFullName(location.state.fullName || '');
+            setPassword(''); // Reset password field for Google users
+        }
+    }, [location.state]);
 
     useEffect(() => {
         if (isCodeSent) {
@@ -46,7 +55,6 @@ function RegisterComponent() {
                 }
             });
         }, 1000);
-
     };
 
     const validateEmail = (email) => {
@@ -59,7 +67,6 @@ function RegisterComponent() {
     };
 
     const sendVerificationEmail = async (userEmail, code) => {
-        // Normalize email and full name
         const normalizedEmail = email.toLowerCase();
         const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
 
@@ -72,7 +79,6 @@ function RegisterComponent() {
             verification_code: code
         };
 
-        // Wait for 10 seconds before sending the email
         await new Promise(resolve => setTimeout(resolve, 10000));
 
         emailjs.send(serviceId, templateId, templateParams, publicKey)
@@ -94,7 +100,7 @@ function RegisterComponent() {
             setEmailError('');
         }
 
-        if (!password || !validatePassword(password)) {
+        if (!location.state && (!password || !validatePassword(password))) {
             setPasswordError('Password must be at least 6 characters long');
             valid = false;
         } else {
@@ -110,11 +116,9 @@ function RegisterComponent() {
 
         if (!valid) return;
 
-        // Normalize email and full name
         const normalizedEmail = email.toLowerCase();
         const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
 
-        // Check if email or name already exists
         try {
             await checkUserExistence({ email: normalizedEmail, fullName: normalizedFullName });
         } catch (error) {
@@ -126,14 +130,13 @@ function RegisterComponent() {
             return;
         }
 
-        // sending VerificationEmail request with random code
         try {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setVerificationCode(code);
             sendVerificationEmail(normalizedEmail, code);
             setIsCodeSent(true);
-            setCountdown(300); // Reset countdown to 5 minutes
-            setCanResend(false); // Disable resend initially
+            setCountdown(300);
+            setCanResend(false);
             toast.success('Verification code sent! Please check your email.');
         } catch (error) {
             console.error('Failed to send verification code', error);
@@ -141,11 +144,20 @@ function RegisterComponent() {
         }
     };
 
-
     const handleVerification = async () => {
         if (verificationCode === userInputCode) {
+            const userData = {
+                email: email.toLowerCase(),
+                password: password,
+                fullName: fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase(),
+                type: "Student",
+                isVerified: true
+            };
+
+            console.log("User Data:", userData);
+
             try {
-                const response = await registerUser({ email: email.toLowerCase(), password, fullName: fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase(), type: "Student", isVerified: true });
+                const response = await registerUser(userData);
                 if (response) {
                     toast.success('Registration successful!');
                     navigate('/login');
@@ -164,10 +176,10 @@ function RegisterComponent() {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setVerificationCode(code);
             sendVerificationEmail(email.toLowerCase(), code);
-            setCountdown(300); // Reset countdown to 5 minutes
-            setCanResend(false); // Disable resend initially
+            setCountdown(300);
+            setCanResend(false);
             toast.success('New verification code sent! Please check your email.');
-            startCountdown(); // Restart countdown
+            startCountdown();
         }
     };
 
@@ -192,6 +204,7 @@ function RegisterComponent() {
                             onChange={(e) => setEmail(e.target.value)}
                             placeholder="Enter email"
                             autoComplete="email"
+                            disabled={!!location.state} // Disable email input if redirected from Google login
                         />
                         {emailError && <div className="text-danger">{emailError}</div>}
                     </div>
@@ -204,6 +217,7 @@ function RegisterComponent() {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Password"
                             autoComplete="new-password"
+                            disabled={!!location.state} // Disable password input if redirected from Google login
                         />
                         {passwordError && <div className="text-danger">{passwordError}</div>}
                     </div>
@@ -216,6 +230,7 @@ function RegisterComponent() {
                             onChange={(e) => setFullName(e.target.value)}
                             placeholder="Enter Name"
                             autoComplete="name"
+                            disabled={!!location.state} // Disable full name input if redirected from Google login
                         />
                         {fullNameError && <div className="text-danger">{fullNameError}</div>}
                     </div>
