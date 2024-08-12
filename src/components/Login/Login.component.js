@@ -31,8 +31,10 @@ function LoginComponent({ setUser }) {
 
         if (!valid) return;
 
+        const normalizedEmail = email.toLowerCase();
+
         try {
-            const response = await loginUser({ email, password });
+            const response = await loginUser({ email: normalizedEmail, password });
             if (response) {
                 localStorage.setItem('user', JSON.stringify(response));
                 setUser(response);
@@ -44,6 +46,7 @@ function LoginComponent({ setUser }) {
             toast.error('Invalid email or password');
         }
     };
+
 
     const handleGoogleSuccess = async (response) => {
         try {

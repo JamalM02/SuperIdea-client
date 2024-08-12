@@ -72,9 +72,13 @@ function RegisterComponent() {
 
         if (!valid) return;
 
+        // Normalize email and full name
+        const normalizedEmail = email.toLowerCase();
+        const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
+
         // Check if email or name already exists
         try {
-            await checkUserExistence({ email, fullName });
+            await checkUserExistence({ email: normalizedEmail, fullName: normalizedFullName });
         } catch (error) {
             if (error.field === 'email') {
                 setEmailError(error.message);
@@ -88,7 +92,7 @@ function RegisterComponent() {
         try {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setVerificationCode(code);
-            sendVerificationEmail(email, code);
+            sendVerificationEmail(normalizedEmail, code);
             setIsCodeSent(true);
             toast.success('Verification code sent! Please check your email.');
         } catch (error) {
@@ -96,6 +100,7 @@ function RegisterComponent() {
             toast.error('Failed to send verification code. Please try again.');
         }
     };
+
 
     const handleVerification = async () => {
         if (verificationCode === userInputCode) {
