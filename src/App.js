@@ -5,6 +5,7 @@ import Ideas from './components/Ideas/Ideas.component';
 import LoginComponent from './components/Login/Login.component';
 import OurTeamComponent from './components/OurTeam/OurTeam.component';
 import RegisterComponent from './components/Register/Register.component';
+import VerifyComponent from './components/Register/Verify.component';
 import UserAccountComponent from './components/UserAccount/UserAccount.component';
 import TransitionWrapperComponent from './components/Style/TransitionWrapper.component';
 import './components/Style/TransitionWrapper.component.css';
@@ -152,6 +153,7 @@ function App() {
               <Route path="/our-team" element={<OurTeamComponent />} />
               <Route path="/register" element={<RegisterComponent />} />
               <Route path="/user-account" element={<PrivateRoute element={<UserAccountComponent user={user} />} />} />
+              <Route path="/verify" element={<VerifyComponent />} />
               <Route path="/" element={<HomeComponent />} />
             </Routes>
           </TransitionWrapperComponent>
