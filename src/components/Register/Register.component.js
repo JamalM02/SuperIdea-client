@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './Register.component.css';
 import { registerUser, checkUserExistence } from '../../services/api.service';
 import { useNavigate } from 'react-router-dom';
@@ -15,7 +15,39 @@ function RegisterComponent() {
     const [verificationCode, setVerificationCode] = useState('');
     const [userInputCode, setUserInputCode] = useState('');
     const [isCodeSent, setIsCodeSent] = useState(false);
+    const [countdown, setCountdown] = useState(300); // 5 minutes countdown
+    const [canResend, setCanResend] = useState(false);
+    const [isVerifyDisabled, setIsVerifyDisabled] = useState(true); // Disable verify button initially
     const navigate = useNavigate();
+    const timerRef = useRef(null);
+
+    useEffect(() => {
+        if (isCodeSent) {
+            startCountdown();
+        }
+        return () => {
+            clearInterval(timerRef.current);
+        };
+    }, [isCodeSent]);
+
+    useEffect(() => {
+        setIsVerifyDisabled(userInputCode.length === 0);
+    }, [userInputCode]);
+
+    const startCountdown = () => {
+        timerRef.current = setInterval(() => {
+            setCountdown(prev => {
+                if (prev > 1) {
+                    return prev - 1;
+                } else {
+                    clearInterval(timerRef.current);
+                    setCanResend(true);
+                    return 0;
+                }
+            });
+        }, 1000);
+
+    };
 
     const validateEmail = (email) => {
         const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -26,16 +58,22 @@ function RegisterComponent() {
         return password.length >= 6;
     };
 
-    const sendVerificationEmail = (userEmail, code) => {
+    const sendVerificationEmail = async (userEmail, code) => {
+        // Normalize email and full name
+        const normalizedEmail = email.toLowerCase();
+        const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
 
         const serviceId = 'service_i0ttfyd';
         const templateId = 'template_83mscdg';
         const publicKey = 'XX1LO1JMqlpzfXnkT';
         const templateParams = {
-            to_name: fullName.charAt(0).toUpperCase(),
-            to_email: userEmail,
+            to_name: normalizedFullName,
+            to_email: normalizedEmail,
             verification_code: code
         };
+
+        // Wait for 10 seconds before sending the email
+        await new Promise(resolve => setTimeout(resolve, 10000));
 
         emailjs.send(serviceId, templateId, templateParams, publicKey)
             .then((response) => {
@@ -94,6 +132,8 @@ function RegisterComponent() {
             setVerificationCode(code);
             sendVerificationEmail(normalizedEmail, code);
             setIsCodeSent(true);
+            setCountdown(300); // Reset countdown to 5 minutes
+            setCanResend(false); // Disable resend initially
             toast.success('Verification code sent! Please check your email.');
         } catch (error) {
             console.error('Failed to send verification code', error);
@@ -105,7 +145,7 @@ function RegisterComponent() {
     const handleVerification = async () => {
         if (verificationCode === userInputCode) {
             try {
-                const response = await registerUser({ email, password, fullName, type: "Student", isVerified: true });
+                const response = await registerUser({ email: email.toLowerCase(), password, fullName: fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase(), type: "Student", isVerified: true });
                 if (response) {
                     toast.success('Registration successful!');
                     navigate('/login');
@@ -117,6 +157,25 @@ function RegisterComponent() {
         } else {
             toast.error('Invalid verification code');
         }
+    };
+
+    const handleResendCode = () => {
+        if (canResend) {
+            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            setVerificationCode(code);
+            sendVerificationEmail(email.toLowerCase(), code);
+            setCountdown(300); // Reset countdown to 5 minutes
+            setCanResend(false); // Disable resend initially
+            toast.success('New verification code sent! Please check your email.');
+            startCountdown(); // Restart countdown
+        }
+    };
+
+    const handleCancelVerification = () => {
+        setIsCodeSent(false);
+        setCountdown(300);
+        setCanResend(false);
+        setUserInputCode('');
     };
 
     return (
@@ -181,9 +240,25 @@ function RegisterComponent() {
                         value={userInputCode}
                         onChange={(e) => setUserInputCode(e.target.value)}
                     />
-                    <button className="btn btn-primary verification-btn" onClick={handleVerification}>
+                    <button
+                        className="btn btn-primary verification-btn"
+                        onClick={handleVerification}
+                        disabled={isVerifyDisabled} // Disable button when input is empty
+                    >
                         Verify
                     </button>
+                    <button className="btn btn-secondary cancel-btn" onClick={handleCancelVerification}>
+                        Cancel
+                    </button>
+                    <div className="resend-container">
+                        {canResend ? (
+                            <button className="btn btn-secondary resend-btn" onClick={handleResendCode}>
+                                Resend Code
+                            </button>
+                        ) : (
+                            <p>You can resend the code in {Math.floor(countdown / 60)}:{countdown % 60 < 10 ? `0${countdown % 60}` : countdown % 60} minutes</p>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
