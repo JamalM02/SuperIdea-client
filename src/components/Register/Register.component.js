@@ -9,11 +9,9 @@ function RegisterComponent() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [fullName, setFullName] = useState('');
-    const [type, setType] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [fullNameError, setFullNameError] = useState('');
-    const [typeError, setTypeError] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [userInputCode, setUserInputCode] = useState('');
     const [isCodeSent, setIsCodeSent] = useState(false);
@@ -72,13 +70,6 @@ function RegisterComponent() {
             setFullNameError('');
         }
 
-        if (!type) {
-            setTypeError('Please select a user type');
-            valid = false;
-        } else {
-            setTypeError('');
-        }
-
         if (!valid) return;
 
         try {
@@ -96,7 +87,7 @@ function RegisterComponent() {
     const handleVerification = async () => {
         if (verificationCode === userInputCode) {
             try {
-                const response = await registerUser({ email, password, fullName, type, isVerified: true });
+                const response = await registerUser({ email, password, fullName, type: "Student", isVerified: true });
                 if (response) {
                     toast.success('Registration successful!');
                     navigate('/login');
@@ -150,15 +141,6 @@ function RegisterComponent() {
                             autoComplete="name"
                         />
                         {fullNameError && <div className="text-danger">{fullNameError}</div>}
-                    </div>
-                    <div className="register-form-group">
-                        <label className="register-type-head">User type</label>
-                        <select className="register-form-control" value={type} onChange={(e) => setType(e.target.value)} autoComplete="off">
-                            <option value="">Select type</option>
-                            <option value="Student">Student</option>
-                            <option value="Teacher">Teacher</option>
-                        </select>
-                        {typeError && <div className="text-danger">{typeError}</div>}
                     </div>
                     <div className="text-center mt-4">
                         <button className="btn btn-primary register-btn" onClick={handleRegister}>
