@@ -122,4 +122,12 @@ export const fetchTopContributors = async () => {
     }
 };
 
+export const checkUserExistence = async (userData) => {
+    try {
+        const response = await axios.post(`${API_URL}/users/checkExistence`, userData);
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+};
 

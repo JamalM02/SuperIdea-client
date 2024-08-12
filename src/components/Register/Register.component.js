@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './Register.component.css';
-import { registerUser } from '../../services/api.service';
+import { registerUser, checkUserExistence } from '../../services/api.service';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import emailjs from 'emailjs-com';
@@ -72,6 +72,19 @@ function RegisterComponent() {
 
         if (!valid) return;
 
+        // Check if email or name already exists
+        try {
+            await checkUserExistence({ email, fullName });
+        } catch (error) {
+            if (error.field === 'email') {
+                setEmailError(error.message);
+            } else if (error.field === 'fullName') {
+                setFullNameError(error.message);
+            }
+            return;
+        }
+
+        // sending VerificationEmail request with random code
         try {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setVerificationCode(code);
