@@ -32,7 +32,7 @@ function RegisterComponent() {
         const templateId = 'template_83mscdg';
         const publicKey = 'XX1LO1JMqlpzfXnkT';
         const templateParams = {
-            to_name: fullName,
+            to_name: fullName.charAt(0).toUpperCase(),
             to_email: userEmail,
             verification_code: code
         };
