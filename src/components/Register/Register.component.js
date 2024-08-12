@@ -29,13 +29,17 @@ function RegisterComponent() {
     };
 
     const sendVerificationEmail = (userEmail, code) => {
+
+        const serviceId = 'service_i0ttfyd';
+        const templateId = 'template_83mscdg';
+        const publicKey = 'XX1LO1JMqlpzfXnkT';
         const templateParams = {
             to_name: fullName,
             to_email: userEmail,
             verification_code: code
         };
 
-        emailjs.send('service_i0ttfyf', 'template_83mscdg', templateParams, 'saeSHs4lMINJFHysr')
+        emailjs.send(serviceId, templateId, templateParams, publicKey)
             .then((response) => {
                 console.log('Email sent successfully!', response.status, response.text);
             })
