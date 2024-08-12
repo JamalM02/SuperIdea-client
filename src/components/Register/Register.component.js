@@ -63,9 +63,9 @@ function RegisterComponent() {
         const normalizedEmail = email.toLowerCase();
         const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
 
-        const serviceId = 'service_i0ttfyd';
-        const templateId = 'template_83mscdg';
-        const publicKey = 'XX1LO1JMqlpzfXnkT';
+        const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+        const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+        const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
         const templateParams = {
             to_name: normalizedFullName,
             to_email: normalizedEmail,
