@@ -13,6 +13,8 @@
 
 .file-list {
     margin-top: 10px;
+    overflow-y: auto; /* Add scroll */
+
 }
 
 .file-item {

@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import './Register.component.css';
-import { registerUser, checkUserExistence } from '../../services/api.service';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { toast } from 'react-toastify';
+import {registerUser, checkUserExistence} from '../../services/api.service';
+import {useNavigate, useLocation} from 'react-router-dom';
+import {toast} from 'react-toastify';
 import emailjs from 'emailjs-com';
+import { validateEmail, validateFullName, formatFullName } from './formatUtils';
 
 function RegisterComponent() {
     const [email, setEmail] = useState('');
@@ -15,9 +16,10 @@ function RegisterComponent() {
     const [verificationCode, setVerificationCode] = useState('');
     const [userInputCode, setUserInputCode] = useState('');
     const [isCodeSent, setIsCodeSent] = useState(false);
-    const [countdown, setCountdown] = useState(300); // 5 minutes countdown
+    const [countdown, setCountdown] = useState(120); // 2 minutes countdown
     const [canResend, setCanResend] = useState(false);
     const [isVerifyDisabled, setIsVerifyDisabled] = useState(true); // Disable verify button initially
+    const [abortController, setAbortController] = useState(null); // Add AbortController state
     const navigate = useNavigate();
     const location = useLocation();
     const timerRef = useRef(null);
@@ -57,70 +59,70 @@ function RegisterComponent() {
         }, 1000);
     };
 
-    const validateEmail = (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(String(email).toLowerCase());
+    const normalizeAndValidate = (email, fullName) => {
+        const errors = {};
+        const validated = {
+            email: '',
+            fullName: ''
+        };
+
+        if (!email || !validateEmail(email)) {
+            errors.email = 'Please enter a valid email address';
+        } else {
+            validated.email = email.toLowerCase();
+        }
+
+        if (!fullName || !validateFullName(fullName)) {
+            errors.fullName = 'Full name is required and should contain at least two words';
+        } else {
+            validated.fullName = formatFullName(fullName);
+        }
+
+        return { errors, validated };
     };
 
-    const validatePassword = (password) => {
-        return password.length >= 6;
-    };
-
-    const sendVerificationEmail = async (userEmail, code) => {
-        const normalizedEmail = email.toLowerCase();
-        const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
-
+    const sendVerificationEmail = async (userEmail, code, controller) => {
         const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
         const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
         const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
         const templateParams = {
-            to_name: normalizedFullName,
-            to_email: normalizedEmail,
+            to_name: userEmail.fullName,
+            to_email: userEmail.email,
             verification_code: code
         };
 
         await new Promise(resolve => setTimeout(resolve, 10000));
 
-        emailjs.send(serviceId, templateId, templateParams, publicKey)
-            .then((response) => {
-                console.log('Email sent successfully!', response.status, response.text);
-            })
-            .catch((error) => {
+        try {
+            await emailjs.send(serviceId, templateId, templateParams, publicKey, {signal: controller.signal});
+            console.log('Email sent successfully!');
+        } catch (error) {
+            if (controller.signal.aborted) {
+                console.log('Email sending canceled');
+            } else {
                 console.error('Failed to send email:', error);
-            });
+            }
+        }
     };
 
     const handleRegister = async () => {
-        let valid = true;
+        const { errors, validated } = normalizeAndValidate(email, fullName);
+        setEmailError(errors.email || '');
+        setFullNameError(errors.fullName || '');
 
-        if (!email || !validateEmail(email)) {
-            setEmailError('Please enter a valid email address');
-            valid = false;
-        } else {
-            setEmailError('');
+        if (Object.keys(errors).length > 0) {
+            return;
         }
 
-        if (!location.state && (!password || !validatePassword(password))) {
+        if (!location.state && (!password || password.length < 6)) {
             setPasswordError('Password must be at least 6 characters long');
-            valid = false;
+            return;
         } else {
             setPasswordError('');
         }
 
-        if (!fullName) {
-            setFullNameError('Full name is required');
-            valid = false;
-        } else {
-            setFullNameError('');
-        }
-
-        if (!valid) return;
-
-        const normalizedEmail = email.toLowerCase();
-        const normalizedFullName = fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase();
-
         try {
-            await checkUserExistence({ email: normalizedEmail, fullName: normalizedFullName });
+            await checkUserExistence({ email: validated.email, fullName: validated.fullName });
         } catch (error) {
             if (error.field === 'email') {
                 setEmailError(error.message);
@@ -130,12 +132,21 @@ function RegisterComponent() {
             return;
         }
 
+        // Cancel previous request if there is one
+        if (abortController) {
+            abortController.abort();
+        }
+
+        // Create a new AbortController
+        const newAbortController = new AbortController();
+        setAbortController(newAbortController);
+
         try {
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setVerificationCode(code);
-            sendVerificationEmail(normalizedEmail, code);
+            sendVerificationEmail(validated, code, newAbortController);
             setIsCodeSent(true);
-            setCountdown(300);
+            setCountdown(120);
             setCanResend(false);
             toast.success('Verification code sent! Please check your email.');
         } catch (error) {
@@ -145,11 +156,12 @@ function RegisterComponent() {
     };
 
     const handleVerification = async () => {
+    const { validated } = normalizeAndValidate(email, fullName);
         if (verificationCode === userInputCode) {
             const userData = {
-                email: email.toLowerCase(),
+            email: validated.email,
                 password: password,
-                fullName: fullName.charAt(0).toUpperCase() + fullName.slice(1).toLowerCase(),
+                fullName: validated.fullName = formatFullName(fullName),
                 type: "Student",
                 isVerified: true
             };
@@ -173,10 +185,19 @@ function RegisterComponent() {
 
     const handleResendCode = () => {
         if (canResend) {
+            // Cancel previous request if there is one
+            if (abortController) {
+                abortController.abort();
+            }
+
+            // Create a new AbortController
+            const newAbortController = new AbortController();
+            setAbortController(newAbortController);
+
             const code = Math.floor(100000 + Math.random() * 900000).toString();
             setVerificationCode(code);
-            sendVerificationEmail(email.toLowerCase(), code);
-            setCountdown(300);
+            sendVerificationEmail({ email: email.toLowerCase(), fullName: formatFullName(fullName) }, code, newAbortController);
+            setCountdown(120);
             setCanResend(false);
             toast.success('New verification code sent! Please check your email.');
             startCountdown();
@@ -185,7 +206,7 @@ function RegisterComponent() {
 
     const handleCancelVerification = () => {
         setIsCodeSent(false);
-        setCountdown(300);
+        setCountdown(120);
         setCanResend(false);
         setUserInputCode('');
     };

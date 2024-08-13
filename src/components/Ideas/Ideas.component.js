@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { fetchIdeas, createIdea, likeIdea, fetchZipContents } from '../../services/api.service';
 import { toast } from 'react-toastify';
-import { Modal, Button, Spinner } from 'react-bootstrap';
+import { Modal, Button, Tooltip, Overlay, Spinner } from 'react-bootstrap';
 import './Ideas.component.css';
 import '../Style/ModalStyle.component.css';
 import { formatDistanceToNow } from 'date-fns/esm';
-import FileUploadModal from '../Style/FileUploadModal';
-import FileContentsModal from '../Style/FileContentsModal';
+import FileUploadModal from './FileUploadModal/FileUploadModal';
+import FileContentsModal from './FileUploadModal/FileContentsModal';
 
 const DESCRIPTION_CHARACTER_LIMIT = 300;
 const TITLE_CHARACTER_LIMIT = 20;
+const MAX_FILE_COUNT = 9;
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
@@ -50,7 +51,7 @@ function Ideas() {
     const [showModal, setShowModal] = useState(false);
     const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const [showLikes, setShowLikes] = useState(null);
-    const [setTarget] = useState(null);
+    const [target, setTarget] = useState(null);
     const [remainingTitleChars, setRemainingTitleChars] = useState(TITLE_CHARACTER_LIMIT);
     const [remainingDescriptionChars, setRemainingDescriptionChars] = useState(DESCRIPTION_CHARACTER_LIMIT);
     const [loadingIdeas, setLoadingIdeas] = useState(false);
@@ -59,6 +60,9 @@ function Ideas() {
     const [loadingSubmit, setLoadingSubmit] = useState(false);
     const [showFileContentsModal, setShowFileContentsModal] = useState(false);
     const [fileContents, setFileContents] = useState([]);
+    const [showUploadedFilesModal, setShowUploadedFilesModal] = useState(false);
+
+    const abortControllerRef = useRef(null);
 
     useEffect(() => {
         const fetchAllIdeas = async () => {
@@ -79,9 +83,14 @@ function Ideas() {
         fetchAllIdeas();
     }, []);
 
-    const handleAddIdea = async () => {
+        const handleAddIdea = async () => {
         if (title.trim() === '' || description.trim() === '') {
             toast.warning('Title and description are required');
+            return;
+        }
+
+        if (files.length === 0) {
+            toast.warning('Please upload at least one file');
             return;
         }
 
@@ -99,8 +108,11 @@ function Ideas() {
 
         setLoadingSubmit(true);
 
+        abortControllerRef.current = new AbortController();
+        const signal = abortControllerRef.current.signal;
+
         try {
-            await createIdea(newIdea, files);
+            await createIdea(newIdea, files, signal);
             resetForm();
             setShowModal(false);
             let updatedIdeas = await retry(fetchIdeas);
@@ -108,13 +120,16 @@ function Ideas() {
             setIdeas(updatedIdeas);
             toast.success('New idea added successfully!');
         } catch (error) {
-            console.error('Error creating idea:', error);
-            alert('Failed to create idea');
+            if (error.name === 'AbortError') {
+                console.log('Request was aborted');
+            } else {
+                console.error('Error creating idea:', error);
+                toast.error('Failed to create idea');
+            }
         } finally {
             setLoadingSubmit(false);
         }
     };
-
     const handleTitleChange = (e) => {
         const newTitle = e.target.value;
         if (newTitle.length <= TITLE_CHARACTER_LIMIT) {
@@ -132,8 +147,17 @@ function Ideas() {
     };
 
     const handleFileUpload = (uploadedFiles) => {
-        setFiles(uploadedFiles);
+        const newFiles = [...files, ...uploadedFiles];
+        if (newFiles.length > MAX_FILE_COUNT) {
+            toast.error(`You can only upload up to ${MAX_FILE_COUNT} files.`);
+        } else {
+            setFiles(newFiles);
+        }
         setShowFileUploadModal(false);
+    };
+
+    const handleFileRemove = (fileIndex) => {
+        setFiles(files.filter((_, index) => index !== fileIndex));
     };
 
     const handleLike = async (ideaId) => {
@@ -209,9 +233,13 @@ function Ideas() {
     };
 
     const handleCloseModal = () => {
-        resetForm();
-        setShowModal(false);
-    };
+    if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+    }
+    resetForm();
+    setShowModal(false);
+};
+
 
     const handleDownload = (fileId) => {
         const apiUrl = process.env.REACT_APP_API_URL_PROD || process.env.REACT_APP_API_URL_DEV;
@@ -237,6 +265,14 @@ function Ideas() {
     const handleCloseFileContentsModal = () => {
         setShowFileContentsModal(false);
         setFileContents([]);
+    };
+
+    const handleShowUploadedFiles = () => {
+        setShowUploadedFilesModal(true);
+    };
+
+    const handleCloseUploadedFilesModal = () => {
+        setShowUploadedFilesModal(false);
     };
 
     return (
@@ -279,6 +315,14 @@ function Ideas() {
                         </small>
                     </div>
                     <Button className="upload-button" onClick={() => setShowFileUploadModal(true)}>Upload Files</Button>
+                    <p style={{color: 'lightblue' }}>Number of uploaded files: {files.length}/{MAX_FILE_COUNT}</p>
+                    <ul className="uploaded-files-list">
+                        {files.map((file, index) => (
+                            <li key={index}>
+                                {file.name} <Button variant="link" onClick={() => handleFileRemove(index)}>Remove</Button>
+                            </li>
+                        ))}
+                    </ul>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseModal}>
@@ -295,6 +339,24 @@ function Ideas() {
                 handleClose={() => setShowFileUploadModal(false)}
                 handleFilesSubmit={handleFileUpload}
             />
+
+            <Modal show={showUploadedFilesModal} onHide={handleCloseUploadedFilesModal} centered className="custom-modal">
+                <Modal.Header closeButton>
+                    <Modal.Title>Uploaded Files</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <ul>
+                        {files.map((file, index) => (
+                            <li key={index}>{file.name}</li>
+                        ))}
+                    </ul>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseUploadedFilesModal}>
+                        Close
+                    </Button>
+                </Modal.Footer>
+            </Modal>
 
             <div className="ideas-list">
                 {loadingIdeas ? (

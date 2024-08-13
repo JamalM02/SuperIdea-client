@@ -45,9 +45,9 @@ const FileUploadModal = ({ show, handleClose, handleFilesSubmit }) => {
     const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
     return (
-        <Modal show={show} onHide={handleClose}>
+        <Modal show={show} centered={true} onHide={handleClose}>
             <Modal.Header closeButton>
-                <Modal.Title>Upload Files</Modal.Title>
+                <Modal.Title>Upload Files -  Up to {files.length} files</Modal.Title>
             </Modal.Header>
             <Modal.Body>
                 <div {...getRootProps({ className: 'dropzone' })}>

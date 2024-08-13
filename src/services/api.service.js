@@ -21,7 +21,7 @@ export const loginUser = async (credentials) => {
     }
 };
 
-export const createIdea = async (idea, files) => {
+export const createIdea = async (idea, files, signal) => {
     try {
         const user = JSON.parse(localStorage.getItem('user'));
         const simplifiedUser = {
@@ -42,7 +42,8 @@ export const createIdea = async (idea, files) => {
         const response = await axios.post(`${API_URL}/ideas`, formData, {
             headers: {
                 'Content-Type': 'multipart/form-data'
-            }
+            },
+            signal // Add the signal here
         });
         return response.data;
     } catch (error) {

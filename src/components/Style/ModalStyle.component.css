@@ -3,9 +3,10 @@
 /* Custom Modal Styles */
 .custom-modal .modal-content {
     background: linear-gradient(to right, rgba(33, 37, 41, 0.8), rgba(101, 117, 161, 0.64));
-    border-radius: 15px;
+    border-radius: 30px;
     color: white;
-    height: fit-content;
+    max-height: 600px;
+
 }
 
 .custom-modal .modal-header {
@@ -24,7 +25,6 @@
 .custom-modal .modal-body {
     padding: 20px;
     text-align: left;
-    max-height: 320px; /* Adjust this value as needed */
     overflow-y: auto; /* Add scroll */
 }
 
@@ -53,4 +53,8 @@
     font-size: 0.8em;
     color: #ddd; /* Adjust the color as needed */
     margin-left: 5px;
+}
+
+.custom-upload-modal .modal-content {
+    background-color: white;
 }
