@@ -3,18 +3,18 @@
     z-index: 2;
 }
 
+.home-title {
+    font-weight: bold;
+    color: #0a0a0a;
+    font-family: 'Playfair Display', serif;
+}
+
 .home-reports-container {
     width: 100%;
     border-radius: 20px;
     background: #212529;
     margin-bottom: 30px;
     padding: 20px;
-}
-
-.home-title {
-    font-weight: bold;
-    color: #0a0a0a;
-    font-family: "Playwrite IT Moderna", cursive;
 }
 
 .home-title-container {

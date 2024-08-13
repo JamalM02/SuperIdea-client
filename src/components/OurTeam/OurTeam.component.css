@@ -75,3 +75,8 @@
 .our-team ul li {
     margin-bottom: 0.5rem;
 }
+
+.our-team .title {
+    color: grey;
+    font-family: 'Roboto', sans-serif;
+}

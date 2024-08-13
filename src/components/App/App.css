@@ -3,10 +3,10 @@ body {
   font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: url('./assets/home-background.png'); /* Replace with the path to your image */
+  background-image: url('../../assets/home-background.png'); /* Replace with the path to your image */
   background-size: cover; /* This will make the image cover the entire container */
-  background-position: top;}
-
+  background-position: top;
+}
 
 .App {
   text-align: center;
@@ -21,5 +21,3 @@ body {
 .navbar .nav-link {
   color: #ffffff; /* Navbar links text color */
 }
-
-

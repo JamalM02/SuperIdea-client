@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchIdeas, createIdea, likeIdea, fetchZipContents } from '../../services/api.service';
 import { toast } from 'react-toastify';
-import { Modal, Button, Tooltip, Overlay, Spinner } from 'react-bootstrap';
+import { Modal, Button, Spinner } from 'react-bootstrap';
 import './Ideas.component.css';
 import '../Style/ModalStyle.component.css';
 import { formatDistanceToNow } from 'date-fns/esm';
@@ -10,7 +10,6 @@ import FileContentsModal from '../Style/FileContentsModal';
 
 const DESCRIPTION_CHARACTER_LIMIT = 300;
 const TITLE_CHARACTER_LIMIT = 20;
-const MAX_FILE_COUNT = 9;
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
@@ -51,7 +50,7 @@ function Ideas() {
     const [showModal, setShowModal] = useState(false);
     const [showFileUploadModal, setShowFileUploadModal] = useState(false);
     const [showLikes, setShowLikes] = useState(null);
-    const [target, setTarget] = useState(null);
+    const [setTarget] = useState(null);
     const [remainingTitleChars, setRemainingTitleChars] = useState(TITLE_CHARACTER_LIMIT);
     const [remainingDescriptionChars, setRemainingDescriptionChars] = useState(DESCRIPTION_CHARACTER_LIMIT);
     const [loadingIdeas, setLoadingIdeas] = useState(false);

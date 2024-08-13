@@ -14,6 +14,7 @@
 }
 
 .custom-modal .modal-title {
+    font-family: 'Roboto', sans-serif;
     font-size: 2em;
     font-weight: bold;
     color: white;
