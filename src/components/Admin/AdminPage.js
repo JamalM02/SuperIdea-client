@@ -1,11 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { fetchUsers, changeUserType } from '../../services/api.service';
+import { fetchUsers } from '../../services/api.service';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 import './AdminPage.css';
 
 const AdminPage = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [newType, setNewType] = useState('');
+    const navigate = useNavigate();
+
+    const adminName = "Admin"; // Replace this with the actual admin's name
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -22,15 +28,19 @@ const AdminPage = () => {
         fetchUserData();
     }, []);
 
-    const handleTypeChange = async (userId, type) => {
-        try {
-            await changeUserType(userId, type);
-            setUsers(users.map(user => user._id === userId ? { ...user, type } : user));
-            toast.success('User type updated successfully');
-        } catch (error) {
-            console.error('Error updating type:', error);
-            toast.error('Failed to update user type');
-        }
+    const handleTypeChangeRequest = (user, type) => {
+        setSelectedUser(user);
+        setNewType(type);
+        navigate('/verify', {
+            state: {
+                email: user.email,
+                fullName: user.fullName,
+                context: 'typeChange',
+                userId: user._id,
+                newType: type,
+                adminName: adminName
+            },
+        });
     };
 
     if (loading) {
@@ -58,7 +68,7 @@ const AdminPage = () => {
                         <td>
                             <select
                                 value={user.type}
-                                onChange={(e) => handleTypeChange(user._id, e.target.value)}
+                                    onChange={(e) => handleTypeChangeRequest(user, e.target.value)}
                             >
                                 <option value="Student">Student</option>
                                 <option value="Lecturer">Lecturer</option>

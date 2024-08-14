@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import emailjs from 'emailjs-com';
-import { registerUser } from '../../services/api.service';
+import { registerUser, changeUserType } from '../../services/api.service';
 import { formatFullName } from './formatUtils';
 
 function VerifyComponent() {
@@ -18,7 +18,7 @@ function VerifyComponent() {
     const timerRef = useRef(null);
     const emailSentRef = useRef(false);
 
-    const { email, fullName, password } = location.state || {};
+    const { email, fullName, password, context, userId, newType, adminName } = location.state || {};
 
     useEffect(() => {
         if (!emailSentRef.current) {
@@ -44,12 +44,14 @@ function VerifyComponent() {
 
     const sendVerificationEmail = async (code) => {
         const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
-        const templateId = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
+        const templateId = context === 'typeChange' ? process.env.REACT_APP_EMAILJS_ADMIN_TEMPLATE_ID : process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
         const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
         const templateParams = {
-            to_name: formatFullName(fullName),
-            to_email: email.toLowerCase(),
-            verification_code: code
+            to_name: context === 'typeChange' ? adminName : formatFullName(fullName),
+            to_email: context === 'typeChange' ? 'scholarsharenet@gmail.com' : email.toLowerCase(),
+            verification_code: code,
+            from_name: adminName, // For new template
+            message: context === 'typeChange' ? `User ${fullName} is being changed to ${newType} by ${adminName}. Verification code: ${code}` : `Verification code: ${code}` // For new template
         };
 
         if (abortController) {
@@ -63,7 +65,7 @@ function VerifyComponent() {
 
         try {
             await emailjs.send(serviceId, templateId, templateParams, publicKey, { signal: newAbortController.signal });
-            toast.success('Verification&Validation code sent! Please check your email.');
+            toast.success('Verification code sent! Please check your email.');
         } catch (error) {
             if (newAbortController.signal.aborted) {
                 console.log('Email sending canceled');
@@ -91,11 +93,12 @@ function VerifyComponent() {
 
     const handleVerification = async () => {
         if (!isCodeValid) {
-            toast.error('Verification&Validation code has expired');
+            toast.error('Verification code has expired');
             return;
         }
 
         if (userInputCode === verificationCode) {
+            if (context === 'registration') {
             const userData = {
                 email: email.toLowerCase(),
                 password: password,
@@ -114,6 +117,16 @@ function VerifyComponent() {
                 console.error('Failed to register', error);
                 toast.error('Registration failed! Please try again.');
             }
+            } else if (context === 'typeChange') {
+                try {
+                    await changeUserType(userId, newType);
+                    toast.success('User type updated successfully');
+                    navigate('/admin'); // Redirect back to admin page or handle as needed
+                } catch (error) {
+                    console.error('Failed to update user type', error);
+                    toast.error('Failed to update user type. Please try again.');
+                }
+            }
         } else {
             toast.error('Invalid verification code');
         }
@@ -129,7 +142,11 @@ function VerifyComponent() {
     };
 
     const handleCancelVerification = () => {
+        if (context === 'registration') {
         navigate('/register');
+        } else if (context === 'typeChange') {
+            navigate('/admin');
+        }
     };
 
     return (
@@ -154,7 +171,7 @@ function VerifyComponent() {
                         Resend Code
                     </button>
                 ) : (
-                    <p style={{color: "ActiveCaption" ,fontWeight:"bold"}}>Verification code will expired in  {Math.floor(countdown / 60)}:{countdown % 60 < 10 ? `0${countdown % 60}` : countdown % 60} minutes</p>
+                    <p style={{color: "ActiveCaption" ,fontWeight:"bold"}}>Verification code will expire in {Math.floor(countdown / 60)}:{countdown % 60 < 10 ? `0${countdown % 60}` : countdown % 60} minutes</p>
                 )}
             </div>
         </div>
