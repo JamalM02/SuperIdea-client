@@ -139,4 +139,24 @@ export const checkUserExistenceByEmail = async (email) => {
     return response.data.exists;
 };
 
+export const fetchUsers = async () => {
+    try {
+        const response = await axios.get(`${API_URL}/users`);
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching users:', error);
+        throw error;
+    }
+};
+
+export const changeUserType = async (userId, type) => {
+    try {
+        const response = await axios.put(`${API_URL}/users/change-type/${userId}`, { type });
+        return response.data;
+    } catch (error) {
+        console.error('Error changing user type:', error);
+        throw error;
+    }
+};
+
 

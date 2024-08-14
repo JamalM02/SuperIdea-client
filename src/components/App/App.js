@@ -8,6 +8,7 @@ import RegisterComponent from '../Register/Register.component';
 import VerifyComponent from '../Register/Verify.component';
 import UserAccountComponent from '../UserAccount/UserAccount.component';
 import TransitionWrapperComponent from '../Style/TransitionWrapper.component';
+import AdminPage from '../Admin/AdminPage'; // Import AdminPage component
 import '../Style/TransitionWrapper.component.css';
 import './App.css';
 import { ToastContainer, toast } from 'react-toastify';
@@ -90,8 +91,9 @@ function App() {
     { label: `Hi ${user ? user.fullName : ''}!`, path: '' },
     { path: '/user-account', label: 'My Profile' },
     { path: '/ideas', label: 'Posts' },
-    { path: '/our-team', label: 'Meet The Team' }
-  ];
+    { path: '/our-team', label: 'Meet The Team' },
+    user && user.type === 'Admin' && { path: '/admin', label: 'Admin Page' } // Admin link
+  ].filter(Boolean);
 
   return (
       <div className="App">
@@ -154,6 +156,7 @@ function App() {
               <Route path="/register" element={<RegisterComponent />} />
               <Route path="/user-account" element={<PrivateRoute element={<UserAccountComponent user={user} />} />} />
               <Route path="/verify" element={<VerifyComponent />} />
+            <Route path="/admin" element={<PrivateRoute element={<AdminPage />} />} />
               <Route path="/" element={<HomeComponent />} />
             </Routes>
           </TransitionWrapperComponent>

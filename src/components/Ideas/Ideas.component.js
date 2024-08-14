@@ -280,7 +280,7 @@ function Ideas() {
             <div className="page-title-container">
                 <div className="title-subtitle-container">
                     <div className="page-title">Posts</div>
-                    <p className="page-subtitle">Share between all the students and teachers and contribute to the Students' Community!</p>
+                    <p className="page-subtitle">Share between Students and Lecturers and contribute to the Students' Community!</p>
                 </div>
                 <Button onClick={() => setShowModal(true)} className="create-idea-button">
                     Create New Post

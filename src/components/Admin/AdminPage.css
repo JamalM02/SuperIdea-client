@@ -1,0 +1,28 @@
+.admin-page-container {
+    margin: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.admin-table th,
+.admin-table td {
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left;
+}
+
+.admin-table th {
+    background-color: #e9ecef;
+}
+
+.admin-table select {
+    width: 100%;
+    padding: 4px;
+}

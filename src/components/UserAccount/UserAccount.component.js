@@ -246,7 +246,7 @@ function UserAccountComponent({ user }) {
                                 <td>{report.totalStudentIdeas}</td>
                             </tr>
                             <tr>
-                                <td>Teachers</td>
+                                <td>Lecturers</td>
                                 <td>{report.totalTeacherIdeas}</td>
                             </tr>
                             </tbody>
