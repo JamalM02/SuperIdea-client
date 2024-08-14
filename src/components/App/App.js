@@ -5,7 +5,7 @@ import Ideas from '../Ideas/Ideas.component';
 import LoginComponent from '../Login/Login.component';
 import OurTeamComponent from '../OurTeam/OurTeam.component';
 import RegisterComponent from '../Register/Register.component';
-import VerifyComponent from '../Register/Verify.component';
+import VerifyComponent from '../Verification&Validation/Verify.component';
 import UserAccountComponent from '../UserAccount/UserAccount.component';
 import TransitionWrapperComponent from '../Style/TransitionWrapper.component';
 import AdminPage from '../Admin/AdminPage'; // Import AdminPage component
