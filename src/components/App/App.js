@@ -89,7 +89,7 @@ function App() {
   const loggedInLinks = [
     { label: `Hi ${user ? user.fullName : ''}!`, path: '' },
     { path: '/user-account', label: 'My Profile' },
-    { path: '/ideas', label: 'Ideas' },
+    { path: '/ideas', label: 'Posts' },
     { path: '/our-team', label: 'Meet The Team' }
   ];
 
@@ -138,7 +138,7 @@ function App() {
             <ul className="navbar-nav ms-auto">
               {user && (
                   <li className="nav-item">
-                    <button className="btn btn-link nav-link" onClick={() => { handleLogout(); }}>Logout</button>
+                    <button style={{color: 'red' }} className="btn btn-link nav-link" onClick={() => { handleLogout(); }}>Logout</button>
                   </li>
               )}
             </ul>

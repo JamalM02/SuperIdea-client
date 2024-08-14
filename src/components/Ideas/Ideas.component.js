@@ -283,7 +283,7 @@ function Ideas() {
                     <p className="page-subtitle">Share between all the students and teachers and contribute to the Students' Community!</p>
                 </div>
                 <Button onClick={() => setShowModal(true)} className="create-idea-button">
-                    Create New Idea
+                    Create New Post
                 </Button>
             </div>
 
