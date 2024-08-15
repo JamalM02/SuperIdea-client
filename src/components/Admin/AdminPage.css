@@ -1,7 +1,7 @@
 .admin-page-container {
     margin: 20px;
     padding: 20px;
-    background-color: #f8f9fa;
+    background-color: #121518;
     border-radius: 8px;
 }
 
@@ -11,7 +11,12 @@
     margin-top: 20px;
 }
 
-.admin-table th,
+.admin-table th{
+    color: black;
+    border: 1px solid #dee2e6;
+    padding: 8px;
+    text-align: left;
+}
 .admin-table td {
     border: 1px solid #dee2e6;
     padding: 8px;

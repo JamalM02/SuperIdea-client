@@ -157,3 +157,11 @@
     height: 20px;
     margin-left: 5px;
 }
+
+.qr-code-container {
+    text-align: center;
+}
+.qr-code-container img {
+    max-width: 100%;
+    height: auto;
+}

@@ -46,9 +46,9 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "cross-env": "^7.0.3",
     "env-cmd": "^10.1.0",
-    "react-app-rewired": "^2.2.1",
-    "cross-env": "^7.0.3"
+    "react-app-rewired": "^2.2.1"
   },
   "engines": {
     "node": "^20.x.x"
