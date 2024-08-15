@@ -73,7 +73,14 @@ function RegisterComponent() {
         }
 
         const code = Math.floor(100000 + Math.random() * 900000).toString();
-        navigate('/verify', { state: { email: validated.email, fullName: validated.fullName, verificationCode: code, password: password } });
+        navigate('/verify', {
+            state: {
+                email: validated.email,
+                fullName: validated.fullName,
+                context: 'registration',
+                verificationCode: code, password: password,
+            }
+        });
     };
 
     return (

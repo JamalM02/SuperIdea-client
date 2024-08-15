@@ -43,9 +43,9 @@ function VerifyComponent() {
     };
 
     const sendVerificationEmail = async (code) => {
-        const serviceId = process.env.EMAILJS_SERVICE_ID;
-        const templateId = context === 'typeChange' ? process.env.EMAILJS_ADMIN_TEMPLATE_ID : process.env.EMAILJS_USER_TEMPLATE_ID;
-        const publicKey = process.env.EMAILJS_PUBLIC_KEY;
+        const serviceId = process.env.REACT_APP_EMAILJS_SERVICE_ID;
+        const templateId = context === 'typeChange' ? process.env.REACT_APP_EMAILJS_ADMIN_TEMPLATE_ID : process.env.REACT_APP_EMAILJS_USER_TEMPLATE_ID;
+        const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
         const templateParams = {
             to_name: context === 'typeChange' ? adminName : formatFullName(fullName),
             to_email: context === 'typeChange' ? 'scholarsharenet@gmail.com' : email.toLowerCase(),
@@ -99,24 +99,24 @@ function VerifyComponent() {
 
         if (userInputCode === verificationCode) {
             if (context === 'registration') {
-            const userData = {
-                email: email.toLowerCase(),
-                password: password,
-                fullName: formatFullName(fullName),
-                type: "Student",
-                isVerified: true
-            };
+                const userData = {
+                    email: email.toLowerCase(),
+                    password: password,
+                    fullName: formatFullName(fullName),
+                    type: "Student",
+                    isVerified: true
+                };
 
-            try {
-                const response = await registerUser(userData);
-                if (response) {
-                    toast.success('Registration successful!');
-                    navigate('/login');
+                try {
+                    const response = await registerUser(userData);
+                    if (response) {
+                        toast.success('Registration successful!');
+                        navigate('/login');
+                    }
+                } catch (error) {
+                    console.error('Failed to register', error);
+                    toast.error('Registration failed! Please try again.');
                 }
-            } catch (error) {
-                console.error('Failed to register', error);
-                toast.error('Registration failed! Please try again.');
-            }
             } else if (context === 'typeChange') {
                 try {
                     await changeUserType(userId, newType);
@@ -143,7 +143,7 @@ function VerifyComponent() {
 
     const handleCancelVerification = () => {
         if (context === 'registration') {
-        navigate('/register');
+            navigate('/register');
         } else if (context === 'typeChange') {
             navigate('/admin');
         }
