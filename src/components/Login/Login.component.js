@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { loginUser } from '../../services/api.service';
-import { toast } from 'react-toastify';
+import React, {useState, useEffect} from 'react';
+import {useNavigate, useLocation} from 'react-router-dom';
+import {loginUser, verify2FA} from '../../services/api.service';
+import {toast} from 'react-toastify';
 import './Login.component.css';
 
-function LoginComponent({ setUser }) {
+function LoginComponent({setUser}) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
@@ -40,12 +40,27 @@ function LoginComponent({ setUser }) {
         const normalizedEmail = email.toLowerCase();
 
         try {
-            const response = await loginUser({ email: normalizedEmail, password });
+            const response = await loginUser({email: normalizedEmail, password});
             if (response) {
-                localStorage.setItem('user', JSON.stringify(response));
-                setUser(response);
-                toast.success('Logged-in successful!');
-                navigate('/user-account');
+                if (response.isTwoFactorEnabled) {
+                    // Prompt for 2FA token
+                    const token = prompt('Enter your 2FA token');
+                    const verificationResponse = await verify2FA(response._id, token);
+                    if (verificationResponse.success) {
+                        localStorage.setItem('user', JSON.stringify(response));
+                        setUser(response);
+                        toast.success('Logged-in successfully!');
+                        navigate('/user-account');
+                    } else {
+                        toast.error('Invalid 2FA token');
+                    }
+                } else {
+                    // If 2FA is not enabled, proceed as usual
+                    localStorage.setItem('user', JSON.stringify(response));
+                    setUser(response);
+                    toast.success('Logged-in successfully!');
+                    navigate('/user-account');
+                }
             }
         } catch (error) {
             console.error('Failed to login', error);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserAchievements, getUserIdeas, getReport, fetchTopContributors } from '../../services/api.service';
+import { getUserAchievements, getUserIdeas, getReport, fetchTopContributors, enable2FA, disable2FA, generate2FA, verify2FA } from '../../services/api.service';
 import { Modal, Button } from 'react-bootstrap';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
@@ -36,6 +36,13 @@ function UserAccountComponent({ user }) {
 
     const [loadingReport, setLoadingReport] = useState(false);
     const [errorReport, setErrorReport] = useState(null);
+
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [showVerifyModal, setShowVerifyModal] = useState(false);
+    const [password, setPassword] = useState('');
+    const [token, setToken] = useState('');
+    const [qrCode, setQrCode] = useState('');
+    const [is2FAEnabled, setIs2FAEnabled] = useState(user.isTwoFactorEnabled);
 
     useEffect(() => {
         if (user) {
@@ -123,6 +130,49 @@ function UserAccountComponent({ user }) {
         setShowLikes(null);
     };
 
+    const handleGenerate2FA = async () => {
+        try {
+            const response = await generate2FA(user._id, password);
+            setQrCode(response.qrCode);
+            setShowVerifyModal(true);
+        } catch (error) {
+            console.error('Error generating QR code:', error);
+        }
+    };
+
+    const handleValidate2FA = async () => {
+        console.log('Validating 2FA with:', { userId: user._id, token });
+        try {
+            const response = await verify2FA(user._id, token);
+            if (response.success) {
+                await handleEnable2FA();  // Enable 2FA only if validation succeeds
+            } else {
+                console.error('Invalid 2FA token');
+            }
+        } catch (error) {
+            console.error('Error validating 2FA token:', error);
+        }
+    };
+
+    const handleEnable2FA = async () => {
+        try {
+            await enable2FA(user._id, password, token);
+            setIs2FAEnabled(true);
+            setShowVerifyModal(false);
+        } catch (error) {
+            console.error('Error enabling 2FA:', error.message, error.response ? error.response.data : '');
+        }
+    };
+
+    const handleDisable2FA = async () => {
+        try {
+            await disable2FA(user._id, password);
+            setIs2FAEnabled(false);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
     return (
         <div className="user-account-wrapper">
             <div className="user-page-title-container">
@@ -178,9 +228,7 @@ function UserAccountComponent({ user }) {
                                 <tr key={idea._id}>
                                     <td className="subject-field">{idea.title} {idea.user && idea.user.topContributor ? '🏆' : ''}</td>
                                     <td className="like-click" onClick={() => handleShowLikes(idea.likes)}
-                                        style={{cursor: 'pointer'}}>
-                                        {idea.likesCount}
-                                    </td>
+                                        style={{cursor: 'pointer'}}>{idea.likesCount}</td>
                                 </tr>
                             ))}
                             </tbody>
@@ -277,6 +325,43 @@ function UserAccountComponent({ user }) {
                         Close
                     </Button>
                 </Modal.Footer>
+            </Modal>
+
+            <Button onClick={() => setShow2FAModal(true)}>
+                {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+            </Button>
+
+            <Modal show={show2FAModal} onHide={() => setShow2FAModal(false)}>
+                <Modal.Header closeButton>
+                    <Modal.Title>{is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <input
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                    />
+                    {is2FAEnabled ? (
+                        <Button onClick={handleDisable2FA}>Disable 2FA</Button>
+                    ) : (
+                        <>
+                            <Button onClick={handleGenerate2FA}>Generate QR Code</Button>
+                            {qrCode && (
+                                <>
+                                    <img src={qrCode} alt="QR Code" style={{ width: '300px', marginTop: '10px' }} />
+                                    <input
+                                        type="text"
+                                        placeholder="Enter 2FA token"
+                                        value={token}
+                                        onChange={(e) => setToken(e.target.value)}
+                                    />
+                                    <Button onClick={handleValidate2FA}>Enable 2FA</Button>
+                                </>
+                            )}
+                        </>
+                    )}
+                </Modal.Body>
             </Modal>
         </div>
     );

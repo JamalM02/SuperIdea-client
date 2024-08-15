@@ -159,4 +159,39 @@ export const changeUserType = async (userId, type) => {
     }
 };
 
+export const disable2FA = async (userId, password) => {
+    const response = await axios.post(`${API_URL}/users/disable-2fa`, { userId, password });
+    return response.data;
+};
+
+export const verify2FA = async (userId, token) => {
+    const response = await axios.post(`${API_URL}/users/verify-2fa`, { userId, token });
+    return response.data;
+};
+
+export const enable2FA = async (userId, password, token) => {
+    try {
+        const response = await axios.post(`${API_URL}/users/enable-2fa`, { userId, password, token });
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error('Error enabling 2FA:', error.response.data);
+            throw new Error(error.response.data.message || 'Failed to enable 2FA');
+        }
+        throw error;
+    }
+};
+
+export const generate2FA = async (userId, password) => {
+    try {
+        const response = await axios.post(`${API_URL}/users/generate-2fa`, { userId, password });
+        return response.data;
+    } catch (error) {
+        if (error.response) {
+            console.error('Error generating 2FA QR code:', error.response.data);
+            throw new Error(error.response.data.message || 'Failed to generate 2FA QR code');
+        }
+        throw error;
+    }
+};
 
