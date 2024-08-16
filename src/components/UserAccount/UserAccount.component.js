@@ -54,7 +54,7 @@ function UserAccountComponent({ user }) {
     const [token, setToken] = useState('');
     const [qrCode, setQrCode] = useState('');
     const [cooldown, setCooldown] = useState(false);
-    const [is2FAEnabled, setIs2FAEnabled] = useState(false);  // Ensure default is false
+    const [is2FAEnabled, setIs2FAEnabled] = useState(false);
 
     const [otpAuthUrl, setOtpAuthUrl] = useState('');
 
@@ -446,9 +446,9 @@ function UserAccountComponent({ user }) {
                                 <>
                                     <img src={qrCode} alt="QR Code" style={{width: '300px', marginTop: '10px'}}/><br/>
                                     <a href={otpAuthUrl} target="_blank" rel="noopener noreferrer">
-                                        Open in Google Authenticator App
+                                        Open in Google Authenticator or Microsoft Authenticator
                                     </a>
-                                    <p>Please ensure you have Google Authenticator installed on your device.</p>
+                                    <p>Please ensure you have either Google Authenticator or Microsoft Authenticator installed on your device.</p>
                                     <br/>
                                     <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
                                        target="_blank" rel="noopener noreferrer">
@@ -459,6 +459,17 @@ function UserAccountComponent({ user }) {
                                        target="_blank" rel="noopener noreferrer">
                                         Download Google Authenticator for iOS
                                     </a>
+                                    <br />
+                                    <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=en&gl=US"
+                                        target="_blank" rel="noopener noreferrer">
+                                        Download Microsoft Authenticator for Android
+                                    </a>
+                                    <br />
+                                    <a href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458"
+                                        target="_blank" rel="noopener noreferrer">
+                                        Download Microsoft Authenticator for iOS
+                                    </a>
+                                    <br />
                                     <input
                                         type="text"
                                         placeholder="Enter 2FA token"
