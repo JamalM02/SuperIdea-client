@@ -159,8 +159,8 @@ export const changeUserType = async (userId, type) => {
     }
 };
 
-export const disable2FA = async (userId, password) => {
-    const response = await axios.post(`${API_URL}/users/disable-2fa`, { userId, password });
+export const disable2FA = async (userId, password, token) => {
+    const response = await axios.post(`${API_URL}/users/disable-2fa`, { userId, password, token });
     return response.data;
 };
 

@@ -171,9 +171,11 @@ function UserAccountComponent({ user }) {
                 setIs2FAEnabled(true);  // Update state immediately
             } else {
                 console.error('Invalid 2FA token');
+                toast.error('Invalid 2FA token. Please try again.');
             }
         } catch (error) {
             console.error('Error validating 2FA token:', error);
+            toast.error('Failed to validate 2FA token. Please try again.');
         }
     };
 
@@ -181,21 +183,49 @@ function UserAccountComponent({ user }) {
         try {
             await enable2FA(user._id, password, token);
             setIs2FAEnabled(true);  // Update state immediately
-        handleClose2FAModal(); // Close the modal
+            toast.success('2FA has been enabled successfully.');
+            handleClose2FAModal(); // Close the modal
         } catch (error) {
             console.error('Error enabling 2FA:', error.message, error.response ? error.response.data : '');
+            if (error.response && error.response.data.message === 'Invalid password') {
+                toast.error('Invalid password. Please try again.');
+            } else if (error.response && error.response.data.message === 'Invalid 2FA token') {
+                toast.error('Invalid 2FA token. Please try again.');
+            } else {
+                toast.error('Failed to enable 2FA. Please check your credentials and try again.');
+            }
         }
     };
 
     const handleDisable2FA = async () => {
         try {
-            await disable2FA(user._id, password);
-            setIs2FAEnabled(false);  // Update state immediately
-            handleClose2FAModal(); // Close the modal
+            const response = await disable2FA(user._id, password, token);
+
+            if (response.message === '2FA disabled') {
+                setIs2FAEnabled(false);  // Update state immediately
+                toast.success('2FA has been disabled successfully.');
+                handleClose2FAModal(); // Close the modal
+            } else {
+                if (response.message === 'Invalid password') {
+                    toast.error('Invalid password. Please try again.');
+                } else if (response.message === 'Invalid 2FA token') {
+                    toast.error('Invalid 2FA token. Please try again.');
+                } else {
+                    toast.error('Failed to disable 2FA. Please check your credentials and try again.');
+                }
+            }
         } catch (error) {
-            console.error(error);
+            console.error('Error disabling 2FA:', error);
+            if (error.response && error.response.data.message === 'Invalid password') {
+                toast.error('Invalid password. Please try again.');
+            } else if (error.response && error.response.data.message === 'Invalid 2FA token') {
+                toast.error('Invalid 2FA token. Please try again.');
+            } else {
+                toast.error('Failed to disable 2FA. Please try again.');
+            }
         }
     };
+
 
     const handleClose2FAModal = () => {
         setShow2FAModal(false);
@@ -374,13 +404,30 @@ function UserAccountComponent({ user }) {
                         type="password"
                         placeholder="Enter your password"
                         value={password}
+                        required
                         onChange={(e) => setPassword(e.target.value)}
                     />
                     {is2FAEnabled ? (
-                        <Button onClick={handleDisable2FA}>Disable 2FA</Button>
+                        <>
+                            <input
+                                type="text"
+                                placeholder="Enter 2FA token"
+                                value={token}
+                                required
+                                onChange={(e) => setToken(e.target.value)}
+                            />
+                            <Button
+                                onClick={handleDisable2FA}
+                                disabled={!password || !token} // Disable the button if either input is empty
+                            >
+                                Disable 2FA
+                            </Button>
+                        </>
                     ) : (
                         <>
-                            <Button onClick={handleGenerate2FA}>Generate QR Code</Button>
+                            <Button onClick={handleGenerate2FA} disabled={!password}>
+                                Generate QR Code
+                            </Button>
                             {qrCode && (
                                 <>
                                     <img src={qrCode} alt="QR Code" style={{ width: '300px', marginTop: '10px' }} />
@@ -388,15 +435,22 @@ function UserAccountComponent({ user }) {
                                         type="text"
                                         placeholder="Enter 2FA token"
                                         value={token}
+                                        required
                                         onChange={(e) => setToken(e.target.value)}
                                     />
-                                    <Button onClick={handleValidate2FA}>Enable 2FA</Button>
+                                    <Button
+                                        onClick={handleValidate2FA}
+                                        disabled={!password || !token} // Disable the button if either input is empty
+                                    >
+                                        Enable 2FA
+                                    </Button>
                                 </>
                             )}
                         </>
                     )}
                 </Modal.Body>
             </Modal>
+
         </div>
     );
 }
