@@ -444,11 +444,21 @@ function UserAccountComponent({ user }) {
                             </Button>
                             {qrCode && (
                                 <>
-                                    <img src={qrCode} alt="QR Code" style={{ width: '300px', marginTop: '10px' }} /><br/>
+                                    <img src={qrCode} alt="QR Code" style={{width: '300px', marginTop: '10px'}}/><br/>
                                     <a href={otpAuthUrl} target="_blank" rel="noopener noreferrer">
-                                        Open in Authenticator App
+                                        Open in Google Authenticator App
+                                    </a>
+                                    <p>Please ensure you have Google Authenticator installed on your device.</p>
+                                    <br/>
+                                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
+                                       target="_blank" rel="noopener noreferrer">
+                                        Download Google Authenticator for Android
                                     </a>
                                     <br/>
+                                    <a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
+                                       target="_blank" rel="noopener noreferrer">
+                                        Download Google Authenticator for iOS
+                                    </a>
                                     <input
                                         type="text"
                                         placeholder="Enter 2FA token"
@@ -457,8 +467,8 @@ function UserAccountComponent({ user }) {
                                         onChange={(e) => setToken(e.target.value)}
                                     />
                                     <Button style={{margin: '10px 10px'}} variant="success"
-                                        onClick={handleValidate2FA}
-                                        disabled={!password || !token} // Disable the button if either input is empty
+                                            onClick={handleValidate2FA}
+                                            disabled={!password || !token} // Disable the button if either input is empty
                                     >
                                         Enable 2FA
                                     </Button>
