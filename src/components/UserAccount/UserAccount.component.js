@@ -158,17 +158,12 @@ function UserAccountComponent({ user }) {
             setQrCode(response.qrCode);
             toast.success('QR code generated successfully.');
 
-            // Start automatic QR code refresh
-            setCooldown(true);
-            setTimeout(async () => {
-                await handleGenerate2FA(); // Automatically regenerate QR code after 5 seconds
-            }, 300000);
         } catch (error) {
             setCooldown(false); // Stop cooldown on error
             if (error.response && error.response.status === 429) {
                 toast.error(error.response.data.message); // Cooldown message from the server
             } else if (error.response && error.response.status === 400) {
-                toast.error(error.response.data.message); // Invalid password
+            toast.error(error.response.data.message); // Invalid password or 2FA already enabled
             } else {
                 console.error('Error generating 2FA QR code:', error);
                 toast.error('Failed to generate QR code. Please try again.');
