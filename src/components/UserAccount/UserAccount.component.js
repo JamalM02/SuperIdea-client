@@ -1,10 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { getUserAchievements, getUserIdeas, getReport, fetchTopContributors, enable2FA, disable2FA, generate2FA, verify2FA } from '../../services/api.service';
-import { Modal, Button } from 'react-bootstrap';
+import React, {useEffect, useState} from 'react';
+import {
+    check2FAStatus,
+    disable2FA,
+    enable2FA,
+    fetchTopContributors,
+    generate2FA,
+    getReport,
+    getUserAchievements,
+    getUserIdeas,
+    verify2FA
+} from '../../services/api.service';
+import {Button, Modal} from 'react-bootstrap';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
-import { Link } from "react-router-dom";
-import { io } from 'socket.io-client';
+import {Link} from "react-router-dom";
+import {io} from 'socket.io-client';
+import {toast} from "react-toastify";
 
 const socket = io(process.env.REACT_APP_API_URL_DEV);
 
@@ -42,10 +53,11 @@ function UserAccountComponent({ user }) {
     const [password, setPassword] = useState('');
     const [token, setToken] = useState('');
     const [qrCode, setQrCode] = useState('');
-    const [is2FAEnabled, setIs2FAEnabled] = useState(user.isTwoFactorEnabled);
+    const [is2FAEnabled, setIs2FAEnabled] = useState(false);  // Ensure default is false
 
     useEffect(() => {
         if (user) {
+            fetch2FAStatus(user._id);  // Fetch the 2FA status on component load
             fetchAchievements(user._id);
             fetchUserIdeas(user._id);
         }
@@ -63,6 +75,15 @@ function UserAccountComponent({ user }) {
             socket.off('likeIdea');
         };
     }, [user]);
+
+    const fetch2FAStatus = async (userId) => {
+        try {
+            const status = await check2FAStatus(userId);  // Fetch the status from the API
+            setIs2FAEnabled(status);  // Update the state based on the fetched status
+        } catch (error) {
+            console.error('Failed to check 2FA status:', error);
+        }
+    };
 
     const fetchAchievements = async (userId) => {
         setLoadingAchievements(true);
@@ -133,9 +154,10 @@ function UserAccountComponent({ user }) {
     const handleGenerate2FA = async () => {
         try {
             const response = await generate2FA(user._id, password);
-            setQrCode(response.qrCode);
-            setShowVerifyModal(true);
+                setQrCode(response.qrCode);
+                setShowVerifyModal(true);
         } catch (error) {
+            toast.error('Invalid password');
             console.error('Error generating QR code:', error);
         }
     };
@@ -146,6 +168,7 @@ function UserAccountComponent({ user }) {
             const response = await verify2FA(user._id, token);
             if (response.success) {
                 await handleEnable2FA();  // Enable 2FA only if validation succeeds
+                setIs2FAEnabled(true);  // Update state immediately
             } else {
                 console.error('Invalid 2FA token');
             }
@@ -157,8 +180,8 @@ function UserAccountComponent({ user }) {
     const handleEnable2FA = async () => {
         try {
             await enable2FA(user._id, password, token);
-            setIs2FAEnabled(true);
-            setShowVerifyModal(false);
+            setIs2FAEnabled(true);  // Update state immediately
+        handleClose2FAModal(); // Close the modal
         } catch (error) {
             console.error('Error enabling 2FA:', error.message, error.response ? error.response.data : '');
         }
@@ -167,10 +190,18 @@ function UserAccountComponent({ user }) {
     const handleDisable2FA = async () => {
         try {
             await disable2FA(user._id, password);
-            setIs2FAEnabled(false);
+            setIs2FAEnabled(false);  // Update state immediately
+            handleClose2FAModal(); // Close the modal
         } catch (error) {
             console.error(error);
         }
+    };
+
+    const handleClose2FAModal = () => {
+        setShow2FAModal(false);
+        setPassword(''); // Clear the password input
+        setToken(''); // Clear the token input
+        setQrCode(''); // Clear the QR code
     };
 
     return (
@@ -184,6 +215,13 @@ function UserAccountComponent({ user }) {
                                 {user.fullName}
                             </>
                         ) : 'Loading...'}
+                        <Button
+                            className="button-2FA"
+                            onClick={() => setShow2FAModal(true)}
+                            style={{ backgroundColor: is2FAEnabled ? 'red' : 'green', color: 'white', fontWeight: 'bold' }}
+                        >
+                            {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                        </Button>
                     </div>
                     <div className="user-page-subtitle">{user ? user.email : 'Loading...'}</div>
                 </div>
@@ -327,11 +365,7 @@ function UserAccountComponent({ user }) {
                 </Modal.Footer>
             </Modal>
 
-            <Button onClick={() => setShow2FAModal(true)}>
-                {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
-            </Button>
-
-            <Modal show={show2FAModal} onHide={() => setShow2FAModal(false)}>
+            <Modal show={show2FAModal} onHide={handleClose2FAModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>{is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}</Modal.Title>
                 </Modal.Header>

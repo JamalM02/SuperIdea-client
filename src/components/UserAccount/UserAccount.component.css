@@ -44,7 +44,7 @@
     margin-top: 6px;
     font-size: 1em;
     color: #ffffff;
-    text-align: center;
+    text-align: left;
 }
 
 .user-achievements{
@@ -164,4 +164,8 @@
 .qr-code-container img {
     max-width: 100%;
     height: auto;
+}
+
+.button-2FA {
+    margin-left: 20px;
 }

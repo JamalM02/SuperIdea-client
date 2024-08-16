@@ -195,3 +195,14 @@ export const generate2FA = async (userId, password) => {
     }
 };
 
+export const check2FAStatus = async (userId) => {
+    try {
+        const response = await axios.get(`${API_URL}/users/${userId}/2fa-status`);
+        return response.data.is2FAEnabled;  // Return only the is2FAEnabled status
+    } catch (error) {
+        console.error('Error checking 2FA status:', error);
+        throw error;
+    }
+};
+
+
