@@ -53,6 +53,7 @@ function UserAccountComponent({ user }) {
     const [password, setPassword] = useState('');
     const [token, setToken] = useState('');
     const [qrCode, setQrCode] = useState('');
+    const [cooldown, setCooldown] = useState(false);
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);  // Ensure default is false
 
     useEffect(() => {
@@ -154,11 +155,24 @@ function UserAccountComponent({ user }) {
     const handleGenerate2FA = async () => {
         try {
             const response = await generate2FA(user._id, password);
-                setQrCode(response.qrCode);
-                setShowVerifyModal(true);
+            setQrCode(response.qrCode);
+            toast.success('QR code generated successfully.');
+
+            // Start automatic QR code refresh
+            setCooldown(true);
+            setTimeout(async () => {
+                await handleGenerate2FA(); // Automatically regenerate QR code after 5 seconds
+            }, 300000);
         } catch (error) {
-            toast.error('Invalid password');
-            console.error('Error generating QR code:', error);
+            setCooldown(false); // Stop cooldown on error
+            if (error.response && error.response.status === 429) {
+                toast.error(error.response.data.message); // Cooldown message from the server
+            } else if (error.response && error.response.status === 400) {
+                toast.error(error.response.data.message); // Invalid password
+            } else {
+                console.error('Error generating 2FA QR code:', error);
+                toast.error('Failed to generate QR code. Please try again.');
+            }
         }
     };
 
@@ -226,12 +240,12 @@ function UserAccountComponent({ user }) {
         }
     };
 
-
     const handleClose2FAModal = () => {
         setShow2FAModal(false);
         setPassword(''); // Clear the password input
         setToken(''); // Clear the token input
         setQrCode(''); // Clear the QR code
+        setCooldown(false); // Stop cooldown when closing the modal
     };
 
     return (
@@ -425,8 +439,8 @@ function UserAccountComponent({ user }) {
                         </>
                     ) : (
                         <>
-                            <Button onClick={handleGenerate2FA} disabled={!password}>
-                                Generate QR Code
+                            <Button onClick={handleGenerate2FA} disabled={!password || cooldown}>
+                                {cooldown ? 'Cooldown...' : 'Generate QR Code'}
                             </Button>
                             {qrCode && (
                                 <>
@@ -450,7 +464,6 @@ function UserAccountComponent({ user }) {
                     )}
                 </Modal.Body>
             </Modal>
-
         </div>
     );
 }
