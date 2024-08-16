@@ -409,7 +409,7 @@ function UserAccountComponent({ user }) {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show2FAModal} onHide={handleClose2FAModal}>
+            <Modal show={show2FAModal} centered={true} onHide={handleClose2FAModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>{is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}</Modal.Title>
                 </Modal.Header>
@@ -417,6 +417,7 @@ function UserAccountComponent({ user }) {
                     <input
                         type="password"
                         placeholder="Enter your password"
+                        style={{marginBottom: '10px', margin: '10px 0'}}
                         value={password}
                         required
                         onChange={(e) => setPassword(e.target.value)}
@@ -425,12 +426,13 @@ function UserAccountComponent({ user }) {
                         <>
                             <input
                                 type="text"
+                                style={{marginLeft: '10px',}}
                                 placeholder="Enter 2FA token"
                                 value={token}
                                 required
                                 onChange={(e) => setToken(e.target.value)}
                             />
-                            <Button
+                            <Button style={{margin: '10px 0'}} variant="danger"
                                 onClick={handleDisable2FA}
                                 disabled={!password || !token} // Disable the button if either input is empty
                             >
@@ -439,7 +441,8 @@ function UserAccountComponent({ user }) {
                         </>
                     ) : (
                         <>
-                            <Button onClick={handleGenerate2FA} disabled={!password || cooldown}>
+                            <Button style={{margin: 10}} variant="success"
+                                    onClick={handleGenerate2FA} disabled={!password || cooldown}>
                                 {cooldown ? 'Cooldown...' : 'Generate QR Code'}
                             </Button>
                             {qrCode && (
