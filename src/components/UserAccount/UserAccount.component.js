@@ -56,6 +56,8 @@ function UserAccountComponent({ user }) {
     const [cooldown, setCooldown] = useState(false);
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);  // Ensure default is false
 
+    const [otpAuthUrl, setOtpAuthUrl] = useState('');
+
     useEffect(() => {
         if (user) {
             fetch2FAStatus(user._id);  // Fetch the 2FA status on component load
@@ -156,8 +158,8 @@ function UserAccountComponent({ user }) {
         try {
             const response = await generate2FA(user._id, password);
             setQrCode(response.qrCode);
+        setOtpAuthUrl(response.otpAuthUrl); // Save the otpAuthUrl
             toast.success('QR code generated successfully.');
-
         } catch (error) {
             setCooldown(false); // Stop cooldown on error
             if (error.response && error.response.status === 429) {
@@ -436,13 +438,17 @@ function UserAccountComponent({ user }) {
                         </>
                     ) : (
                         <>
-                            <Button style={{margin: 10}} variant="success"
+                            <Button style={{margin: 10}} variant="primary"
                                     onClick={handleGenerate2FA} disabled={!password || cooldown}>
                                 {cooldown ? 'Cooldown...' : 'Generate QR Code'}
                             </Button>
                             {qrCode && (
                                 <>
-                                    <img src={qrCode} alt="QR Code" style={{ width: '300px', marginTop: '10px' }} />
+                                    <img src={qrCode} alt="QR Code" style={{ width: '300px', marginTop: '10px' }} /><br/>
+                                    <a href={otpAuthUrl} target="_blank" rel="noopener noreferrer">
+                                        Open in Authenticator App
+                                    </a>
+                                    <br/>
                                     <input
                                         type="text"
                                         placeholder="Enter 2FA token"
@@ -450,7 +456,7 @@ function UserAccountComponent({ user }) {
                                         required
                                         onChange={(e) => setToken(e.target.value)}
                                     />
-                                    <Button
+                                    <Button style={{margin: '10px 10px'}} variant="success"
                                         onClick={handleValidate2FA}
                                         disabled={!password || !token} // Disable the button if either input is empty
                                     >
