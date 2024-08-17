@@ -3,6 +3,7 @@ import {useNavigate, useLocation} from 'react-router-dom';
 import {loginUser, verify2FA} from '../../services/api.service';
 import {toast} from 'react-toastify';
 import './Login.component.css';
+import {Button, Spinner} from "react-bootstrap";
 
 function LoginComponent({setUser}) {
     const [email, setEmail] = useState('');
@@ -11,6 +12,8 @@ function LoginComponent({setUser}) {
     const [passwordError, setPasswordError] = useState('');
     const navigate = useNavigate();
     const location = useLocation();
+    const [loadingLogin, setLoadingLogin] = useState(false);
+
 
     useEffect(() => {
         if (location.state && location.state.email) {
@@ -19,52 +22,59 @@ function LoginComponent({setUser}) {
     }, [location.state]);
 
     const handleLogin = async () => {
-        let valid = true;
-
-        if (!email) {
-            setEmailError('Email is required');
-            valid = false;
-        } else {
-            setEmailError('');
-        }
-
-        if (!password) {
-            setPasswordError('Password is required');
-            valid = false;
-        } else {
-            setPasswordError('');
-        }
-
-        if (!valid) return;
-
-        const normalizedEmail = email.toLowerCase();
-
+        setLoadingLogin(true);
         try {
-            const response = await loginUser({email: normalizedEmail, password});
-            if (response) {
-                if (response.isTwoFactorEnabled) {
-                    // Prompt for 2FA token
-                    const token = prompt('Enter your 2FA token');
-                    const verificationResponse = await verify2FA(response._id, token);
-                    if (verificationResponse.success) {
+            let valid = true;
+            if (!email) {
+                setEmailError('Email is required');
+                valid = false;
+            } else {
+                setEmailError('');
+            }
+
+            if (!password) {
+                setPasswordError('Password is required');
+                valid = false;
+            } else {
+                setPasswordError('');
+            }
+
+            if (!valid) return;
+
+            const normalizedEmail = email.toLowerCase();
+
+            try {
+                const response = await loginUser({email: normalizedEmail, password});
+                if (response) {
+                    if (response.isTwoFactorEnabled) {
+                        // Prompt for 2FA token
+                        const token = prompt('Enter your 2FA token');
+                        const verificationResponse = await verify2FA(response._id, token);
+                        if (verificationResponse.success) {
+                            localStorage.setItem('user', JSON.stringify(response));
+                            setUser(response);
+                            toast.success('Logged-in successfully!');
+                            navigate('/user-account');
+                        } else {
+                            toast.error('Invalid 2FA token');
+                        }
+                    } else {
+                        // If 2FA is not enabled, proceed as usual
                         localStorage.setItem('user', JSON.stringify(response));
                         setUser(response);
                         toast.success('Logged-in successfully!');
                         navigate('/user-account');
-                    } else {
-                        toast.error('Invalid 2FA token');
                     }
-                } else {
-                    // If 2FA is not enabled, proceed as usual
-                    localStorage.setItem('user', JSON.stringify(response));
-                    setUser(response);
-                    toast.success('Logged-in successfully!');
-                    navigate('/user-account');
                 }
+            } catch (error) {
+                console.error('Failed to login', error);
+                toast.error('Invalid email or password');
             }
         } catch (error) {
-            console.error('Failed to login', error);
-            toast.error('Invalid email or password');
+            console.error('Error logging in:', error);
+            toast.error('Failed to login');
+        } finally {
+            setLoadingLogin(false);
         }
     };
 
@@ -97,7 +107,9 @@ function LoginComponent({setUser}) {
                 />
                 {passwordError && <div className="text-danger">{passwordError}</div>}
             </div>
-            <button className="btn btn-primary login-btn" onClick={handleLogin}>Login</button>
+            <Button variant="primary" onClick={handleLogin} disabled={loadingLogin}>
+                {loadingLogin ? <Spinner animation="border" size="sm" /> : 'Login'}
+            </Button>
             <div className="login-register-link">
                 <small>
                     <a href="/register" className="text-muted">Don't have an account? Register</a>

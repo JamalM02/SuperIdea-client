@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './Home.component.css';
-import logo from '../../assets/logo-superida.png';
+import logo from '../../assets/logo/logo-superida.png';
 import { getReport } from '../../services/api.service';
 import { Link } from 'react-router-dom';
 

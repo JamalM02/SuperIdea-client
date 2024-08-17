@@ -1,7 +1,7 @@
 // src/components/OurTeamComponent/OurTeamComponent.js
 import React from 'react';
 import './OurTeam.component.css';
-import head from '../../assets/logo.png';
+import head from '../../assets/logo/logo.png';
 import MatanProf from '../../assets/Matan.jpg';
 import JamalProf from '../../assets/jamal.jpg';
 
