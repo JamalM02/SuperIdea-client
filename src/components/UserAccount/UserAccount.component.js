@@ -1,4 +1,6 @@
 import React, {useEffect, useState} from 'react';
+import {Button, Modal} from 'react-bootstrap';
+import {toast} from 'react-toastify';
 import {
     check2FAStatus,
     disable2FA,
@@ -10,26 +12,29 @@ import {
     getUserIdeas,
     verify2FA
 } from '../../services/api.service';
-import {Button, Modal} from 'react-bootstrap';
+import {Link} from 'react-router-dom';
+import {io} from 'socket.io-client';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
-import {Link} from "react-router-dom";
-import {io} from 'socket.io-client';
-import {toast} from "react-toastify";
+import {FaApple, FaGoogle, FaGooglePlay, FaMicrosoft} from "react-icons/fa";
+import googleAuthIcon from '../../assets/GoogleAuthIcon/googleauth.png';
+import microsoftAuthIcon from '../../assets/MicrosoftAuthIcon/microsoftauth.png';
+
 
 const socket = io(process.env.REACT_APP_API_URL_DEV);
+const ServiceName = 'ScholarShareNet';
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
         return await fn();
     } catch (error) {
         if (retriesLeft === 1) throw error;
-        await new Promise(r => setTimeout(r, interval));
+        await new Promise((r) => setTimeout(r, interval));
         return retry(fn, retriesLeft - 1, interval);
     }
 };
 
-function UserAccountComponent({ user }) {
+function UserAccountComponent({user}) {
     const [achievements, setAchievements] = useState(null);
     const [ideas, setIdeas] = useState([]);
     const [report, setReport] = useState(null);
@@ -54,20 +59,19 @@ function UserAccountComponent({ user }) {
     const [token, setToken] = useState('');
     const [qrCode, setQrCode] = useState('');
     const [cooldown, setCooldown] = useState(false);
+    const [cooldownTimer, setCooldownTimer] = useState(0); // Timer state
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
-
-    const [otpAuthUrl, setOtpAuthUrl] = useState('');
+    const [secret, setSecretKey] = useState('');
 
     useEffect(() => {
         if (user) {
-            fetch2FAStatus(user._id);  // Fetch the 2FA status on component load
+            fetch2FAStatus(user._id);
             fetchAchievements(user._id);
             fetchUserIdeas(user._id);
         }
         fetchReport();
         fetchTopContributorsData();
 
-        // Set up socket listener for like events
         socket.on('likeIdea', () => {
             if (user) {
                 fetchAchievements(user._id);
@@ -79,10 +83,22 @@ function UserAccountComponent({ user }) {
         };
     }, [user]);
 
+    useEffect(() => {
+        let timer;
+        if (cooldown && cooldownTimer > 0) {
+            timer = setTimeout(() => {
+                setCooldownTimer(cooldownTimer - 1);
+            }, 1000);
+        } else if (cooldown && cooldownTimer === 0) {
+            setCooldown(false);
+        }
+        return () => clearTimeout(timer);
+    }, [cooldown, cooldownTimer]);
+
     const fetch2FAStatus = async (userId) => {
         try {
-            const status = await check2FAStatus(userId);  // Fetch the status from the API
-            setIs2FAEnabled(status);  // Update the state based on the fetched status
+            const status = await check2FAStatus(userId);
+            setIs2FAEnabled(status);
         } catch (error) {
             console.error('Failed to check 2FA status:', error);
         }
@@ -135,7 +151,7 @@ function UserAccountComponent({ user }) {
         setErrorTopContributors(null);
         try {
             const response = await retry(fetchTopContributors);
-            setTopContributors(response.filter(contributor => contributor.totalIdeas > 0));
+            setTopContributors(response.filter((contributor) => contributor.totalIdeas > 0));
         } catch (error) {
             console.error('Failed to fetch top contributors', error);
             setErrorTopContributors('Failed to load top contributors');
@@ -158,14 +174,15 @@ function UserAccountComponent({ user }) {
         try {
             const response = await generate2FA(user._id, password);
             setQrCode(response.qrCode);
-        setOtpAuthUrl(response.otpAuthUrl); // Save the otpAuthUrl
-            toast.success('QR code generated successfully.');
+            setSecretKey(response.secret);
+            setCooldown(true);
+            setCooldownTimer(30); // Start a 30-second cooldown
         } catch (error) {
-            setCooldown(false); // Stop cooldown on error
+            setCooldown(false);
             if (error.response && error.response.status === 429) {
-                toast.error(error.response.data.message); // Cooldown message from the server
+                toast.error(error.response.data.message);
             } else if (error.response && error.response.status === 400) {
-            toast.error(error.response.data.message); // Invalid password or 2FA already enabled
+                toast.error(error.response.data.message);
             } else {
                 console.error('Error generating 2FA QR code:', error);
                 toast.error('Failed to generate QR code. Please try again.');
@@ -173,13 +190,23 @@ function UserAccountComponent({ user }) {
         }
     };
 
+    const handleCopyToClipboard = () => {
+        navigator.clipboard.writeText(secret)
+            .then(() => {
+                toast.success('Secret key copied to clipboard.');
+            })
+            .catch(() => {
+                toast.error('Failed to copy the secret key. Please try again.');
+            });
+    };
+
     const handleValidate2FA = async () => {
-        console.log('Validating 2FA with:', { userId: user._id, token });
+        console.log('Validating 2FA with:', {userId: user._id, token});
         try {
             const response = await verify2FA(user._id, token);
             if (response.success) {
-                await handleEnable2FA();  // Enable 2FA only if validation succeeds
-                setIs2FAEnabled(true);  // Update state immediately
+                await handleEnable2FA();
+                setIs2FAEnabled(true);
             } else {
                 console.error('Invalid 2FA token');
                 toast.error('Invalid 2FA token. Please try again.');
@@ -193,9 +220,9 @@ function UserAccountComponent({ user }) {
     const handleEnable2FA = async () => {
         try {
             await enable2FA(user._id, password, token);
-            setIs2FAEnabled(true);  // Update state immediately
+            setIs2FAEnabled(true);
             toast.success('2FA has been enabled successfully.');
-            handleClose2FAModal(); // Close the modal
+            handleClose2FAModal();
         } catch (error) {
             console.error('Error enabling 2FA:', error.message, error.response ? error.response.data : '');
             if (error.response && error.response.data.message === 'Invalid password') {
@@ -211,11 +238,10 @@ function UserAccountComponent({ user }) {
     const handleDisable2FA = async () => {
         try {
             const response = await disable2FA(user._id, password, token);
-
             if (response.message === '2FA disabled') {
-                setIs2FAEnabled(false);  // Update state immediately
+                setIs2FAEnabled(false);
                 toast.success('2FA has been disabled successfully.');
-                handleClose2FAModal(); // Close the modal
+                handleClose2FAModal();
             } else {
                 if (response.message === 'Invalid password') {
                     toast.error('Invalid password. Please try again.');
@@ -239,10 +265,10 @@ function UserAccountComponent({ user }) {
 
     const handleClose2FAModal = () => {
         setShow2FAModal(false);
-        setPassword(''); // Clear the password input
-        setToken(''); // Clear the token input
-        setQrCode(''); // Clear the QR code
-        setCooldown(false); // Stop cooldown when closing the modal
+        setPassword('');
+        setToken('');
+        setQrCode('');
+        setCooldown(false);
     };
 
     return (
@@ -252,19 +278,25 @@ function UserAccountComponent({ user }) {
                     <div className="user-page-title">
                         {user ? (
                             <>
-                                {user.topContributor===true && <span role="img" aria-label="trophy">🏆</span>}
+                                {user.topContributor === true && <span role="img" aria-label="trophy">🏆</span>}
                                 {user.fullName}
                             </>
                         ) : 'Loading...'}
-                        <Button
-                            className="button-2FA"
-                            onClick={() => setShow2FAModal(true)}
-                            style={{ backgroundColor: is2FAEnabled ? 'red' : 'green', color: 'white', fontWeight: 'bold' }}
-                        >
-                            {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
-                        </Button>
                     </div>
                     <div className="user-page-subtitle">{user ? user.email : 'Loading...'}</div>
+                    <Button
+                        className="button-2FA"
+                        onClick={() => setShow2FAModal(true)}
+                        style={{
+                            backgroundColor: is2FAEnabled ? 'red' : 'green',
+                            color: 'white',
+                            fontWeight: 'bold'
+                        }}
+                    >
+                        {is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}
+                        <p style={{fontSize: '10px', margin: '0'}}>Two-Factor Authentication</p>
+                    </Button>
+
                 </div>
                 {user && (
                     <Link to="/ideas">
@@ -285,7 +317,7 @@ function UserAccountComponent({ user }) {
                         <p className="error">{errorAchievements}</p>
                     ) : achievements ? (
                         <p className="user-achievements">
-                            Posts: {achievements.totalIdeas}  likes: {achievements.totalLikes}
+                            Posts: {achievements.totalIdeas} likes: {achievements.totalLikes}
                         </p>
                     ) : null}
                 </div>
@@ -430,8 +462,8 @@ function UserAccountComponent({ user }) {
                                 onChange={(e) => setToken(e.target.value)}
                             />
                             <Button style={{margin: '10px 0'}} variant="danger"
-                                onClick={handleDisable2FA}
-                                disabled={!password || !token} // Disable the button if either input is empty
+                                    onClick={handleDisable2FA}
+                                    disabled={!password || !token}
                             >
                                 Disable 2FA
                             </Button>
@@ -440,36 +472,17 @@ function UserAccountComponent({ user }) {
                         <>
                             <Button style={{margin: 10}} variant="primary"
                                     onClick={handleGenerate2FA} disabled={!password || cooldown}>
-                                {cooldown ? 'Cooldown...' : 'Generate QR Code'}
+                                {cooldown ? `Cooldown... ${cooldownTimer}s` : 'Generate QR Code'}
                             </Button>
                             {qrCode && (
                                 <>
                                     <img src={qrCode} alt="QR Code" style={{width: '300px', marginTop: '10px'}}/><br/>
-                                    <a href={otpAuthUrl} target="_blank" rel="noopener noreferrer">
-                                        Open in Google Authenticator or Microsoft Authenticator
-                                    </a>
-                                    <p>Please ensure you have either Google Authenticator or Microsoft Authenticator installed on your device.</p>
-                                    <br/>
-                                    <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
-                                       target="_blank" rel="noopener noreferrer">
-                                        Download Google Authenticator for Android
-                                    </a>
-                                    <br/>
-                                    <a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
-                                       target="_blank" rel="noopener noreferrer">
-                                        Download Google Authenticator for iOS
-                                    </a>
-                                    <br />
-                                    <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=en&gl=US"
-                                        target="_blank" rel="noopener noreferrer">
-                                        Download Microsoft Authenticator for Android
-                                    </a>
-                                    <br />
-                                    <a href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458"
-                                        target="_blank" rel="noopener noreferrer">
-                                        Download Microsoft Authenticator for iOS
-                                    </a>
-                                    <br />
+                                    <a>Service: <strong>{ServiceName}</strong></a><br/>
+                                    <button onClick={handleCopyToClipboard}>
+                                        Copy Secret Key
+                                    </button>
+                                    <p><strong>NOTE: Click the button to Copy the key and paste it into your
+                                        authenticator app manually.</strong></p>
                                     <input
                                         type="text"
                                         placeholder="Enter 2FA token"
@@ -479,10 +492,60 @@ function UserAccountComponent({ user }) {
                                     />
                                     <Button style={{margin: '10px 10px'}} variant="success"
                                             onClick={handleValidate2FA}
-                                            disabled={!password || !token} // Disable the button if either input is empty
+                                            disabled={!password || !token}
                                     >
                                         Enable 2FA
                                     </Button>
+                                    <br/>
+                                    <p1>For Example:</p1>
+                                    <br/>
+                                    <p2 style={{fontWeight: "bold"}}>Download Google Authenticator:</p2>
+                                    <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+                                        <div style={{textAlign: 'center'}}>
+                                            <a href="https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en&gl=US"
+                                               target="_blank" rel="noopener noreferrer"
+                                               title="Download Google Authenticator for Android">
+                                                <img src={googleAuthIcon} alt="Google Authenticator for Android"
+                                                     style={{width: '50px'}}/> </a>
+                                            <div style={{marginTop: 3, fontSize: '12px'}}>
+                                                Android
+                                            </div>
+                                        </div>
+                                        <div style={{textAlign: 'center'}}>
+                                            <a href="https://apps.apple.com/us/app/google-authenticator/id388497605"
+                                               target="_blank" rel="noopener noreferrer"
+                                               title="Download Google Authenticator for iOS">
+                                                <img src={googleAuthIcon} alt="Google Authenticator iOS"
+                                                     style={{width: '50px'}}/>
+                                            </a>
+                                            <div style={{marginTop: 3, fontSize: '12px'}}>iOS</div>
+                                        </div>
+                                    </div>
+
+                                    <p3 style={{marginTop: 20, fontWeight: "bold"}}>Download Microsoft Authenticator:
+                                    </p3>
+                                    <div style={{display: 'flex', gap: '20px', alignItems: 'center'}}>
+                                        <div style={{textAlign: 'center'}}>
+                                            <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=en&gl=US"
+                                               target="_blank" rel="noopener noreferrer"
+                                               title="Download Microsoft Authenticator for Android">
+                                                <img src={microsoftAuthIcon} alt=" Microsoft Authenticator for Android"
+                                                     style={{width: '50px'}}/>
+                                            </a>
+                                            <div style={{marginTop: 3, fontSize: '12px'}}>
+                                                Android
+                                            </div>
+                                        </div>
+                                        <div style={{textAlign: 'center'}}>
+                                            <a href="https://apps.apple.com/us/app/microsoft-authenticator/id983156458"
+                                               target="_blank" rel="noopener noreferrer"
+                                               title="Download Microsoft Authenticator for iOS">
+                                                <img src={microsoftAuthIcon} alt="Microsoft Authenticator for iOS"
+                                                     style={{width: '50px'}}/>
+                                            </a>
+                                            <div style={{marginTop: 3, fontSize: '12px'}}>iOS</div>
+                                        </div>
+                                    </div>
                                 </>
                             )}
                         </>
