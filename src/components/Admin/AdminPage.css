@@ -1,23 +1,22 @@
+/* General Styles */
 .admin-page-container {
     margin: 20px;
     padding: 20px;
     background-color: #121518;
     border-radius: 8px;
+    color: white; /* Text color for the dark background */
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .admin-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    color: white; /* Ensures text is visible on dark backgrounds */
 }
 
-.admin-table th{
-    color: black;
-    border: 1px solid #dee2e6;
-    padding: 8px;
-    text-align: left;
-}
-.admin-table td {
+.admin-table th, .admin-table td {
     border: 1px solid #dee2e6;
     padding: 8px;
     text-align: left;
@@ -25,9 +24,53 @@
 
 .admin-table th {
     background-color: #e9ecef;
+    color: black; /* Ensures the header text contrasts with the light background */
+}
+
+.admin-table td {
+    background-color: #1c1e21; /* Slightly lighter shade for table rows */
 }
 
 .admin-table select {
     width: 100%;
     padding: 4px;
+    background-color: #1c1e21; /* Match the row background color */
+    color: white; /* Text color for the dropdown */
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media only screen and (max-width: 600px) {
+    .admin-table th, .admin-table td {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .admin-table th {
+        display: none;
+    }
+
+    .admin-table td {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-top: 1px solid #dee2e6; /* Keeps the table structure intact */
+    }
+
+    .admin-table td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        width: 40%;
+        flex-shrink: 0;
+    }
+
+    .admin-table td:last-child {
+        border-bottom: none;
+    }
+
+    .admin-table select {
+        margin-top: 5px;
+    }
 }

@@ -62,13 +62,13 @@ const AdminPage = () => {
                 <tbody>
                 {users.map(user => (
                     <tr key={user._id}>
-                        <td>{user.fullName}</td>
-                        <td>{user.email}</td>
-                        <td>{user.type}</td>
-                        <td>
+                        <td data-label="Username">{user.fullName}</td>
+                        <td data-label="Email">{user.email}</td>
+                        <td data-label="Type">{user.type}</td>
+                        <td data-label="Action">
                             <select
                                 value={user.type}
-                                    onChange={(e) => handleTypeChangeRequest(user, e.target.value)}
+                                onChange={(e) => handleTypeChangeRequest(user, e.target.value)}
                             >
                                 <option value="Student">Student</option>
                                 <option value="Lecturer">Lecturer</option>

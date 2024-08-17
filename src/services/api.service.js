@@ -12,6 +12,9 @@ export const fetchIdeas = async () => {
 export const loginUser = async (credentials) => {
     try {
         const response = await axios.post(`${API_URL}/users/login`, credentials);
+        if (response.data) {
+            localStorage.setItem('user', JSON.stringify(response.data));
+        }
         return response.data;
     } catch (error) {
         if (error.response && error.response.data.errors) {
@@ -141,7 +144,14 @@ export const checkUserExistenceByEmail = async (email) => {
 
 export const fetchUsers = async () => {
     try {
-        const response = await axios.get(`${API_URL}/users`);
+        const user = JSON.parse(localStorage.getItem('user'));
+        const loggedInUserEmail = user ? user.email : null;
+
+        if (!loggedInUserEmail) {
+            throw new Error('No logged-in user email found');
+        }
+
+        const response = await axios.get(`${API_URL}/users?email=${loggedInUserEmail}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching users:', error);
