@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import emailjs from 'emailjs-com';
 import { registerUser, changeUserType } from '../../services/api.service';
 import { formatFullName } from './formatUtils';
+import { Spinner } from 'react-bootstrap'; // Import Spinner component
 
 function VerifyComponent() {
     const [userInputCode, setUserInputCode] = useState('');
@@ -13,6 +14,8 @@ function VerifyComponent() {
     const [isVerifyDisabled, setIsVerifyDisabled] = useState(true);
     const [isCodeValid, setIsCodeValid] = useState(true); // Track code validity
     const [abortController, setAbortController] = useState(null);
+    const [loading, setLoading] = useState(false); // Add loading state
+
     const navigate = useNavigate();
     const location = useLocation();
     const timerRef = useRef(null);
@@ -97,6 +100,8 @@ function VerifyComponent() {
             return;
         }
 
+        setLoading(true); // Start loading before the request
+
         if (userInputCode === verificationCode) {
             if (context === 'registration') {
                 const userData = {
@@ -116,6 +121,8 @@ function VerifyComponent() {
                 } catch (error) {
                     console.error('Failed to register', error);
                     toast.error('Registration failed! Please try again.');
+                } finally {
+                    setLoading(false); // Stop loading after the request completes
                 }
             } else if (context === 'typeChange') {
                 try {
@@ -125,9 +132,12 @@ function VerifyComponent() {
                 } catch (error) {
                     console.error('Failed to update user type', error);
                     toast.error('Failed to update user type. Please try again.');
+                } finally {
+                    setLoading(false); // Stop loading after the request completes
                 }
             }
         } else {
+            setLoading(false); // Stop loading if the code is invalid
             toast.error('Invalid verification code');
         }
     };
@@ -159,15 +169,15 @@ function VerifyComponent() {
                 value={userInputCode}
                 onChange={(e) => setUserInputCode(e.target.value)}
             />
-            <button className="btn btn-primary verify-btn" onClick={handleVerification} disabled={isVerifyDisabled}>
-                Verify
+            <button className="btn btn-primary verify-btn" onClick={handleVerification} disabled={isVerifyDisabled || loading}>
+                {loading ? <Spinner animation="border" size="sm" /> : 'Verify'}
             </button>
-            <button className="btn btn-secondary cancel-btn" onClick={handleCancelVerification}>
+            <button className="btn btn-secondary cancel-btn" onClick={handleCancelVerification} disabled={loading}>
                 Cancel
             </button>
             <div className="resend-container">
                 {canResend ? (
-                    <button className="btn btn-secondary resend-btn" onClick={handleResendCode}>
+                    <button className="btn btn-secondary resend-btn" onClick={handleResendCode} disabled={loading}>
                         Resend Code
                     </button>
                 ) : (

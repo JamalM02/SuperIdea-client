@@ -4,6 +4,7 @@ import { checkUserExistence } from '../../services/api.service';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { validateEmail, validateFullName, formatFullName } from '../Verification&Validation/formatUtils';
+import { Spinner } from 'react-bootstrap'; // Import Spinner component
 
 function RegisterComponent() {
     const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ function RegisterComponent() {
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [fullNameError, setFullNameError] = useState('');
+    const [loading, setLoading] = useState(false); // Add loading state
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -61,26 +63,29 @@ function RegisterComponent() {
             setPasswordError('');
         }
 
+        setLoading(true); // Start loading before the request
+
         try {
             await checkUserExistence({ email: validated.email, fullName: validated.fullName });
-        } catch (error) {
-            if (error.field === 'email') {
-                setEmailError(error.message);
-            } else if (error.field === 'fullName') {
-                setFullNameError(error.message);
-            }
-            return;
-        }
-
         const code = Math.floor(100000 + Math.random() * 900000).toString();
         navigate('/verify', {
             state: {
                 email: validated.email,
                 fullName: validated.fullName,
                 context: 'registration',
-                verificationCode: code, password: password,
+                    verificationCode: code,
+                    password: password,
             }
         });
+        } catch (error) {
+            if (error.field === 'email') {
+                setEmailError(error.message);
+            } else if (error.field === 'fullName') {
+                setFullNameError(error.message);
+            }
+        } finally {
+            setLoading(false); // Stop loading after the request completes
+        }
     };
 
     return (
@@ -126,8 +131,8 @@ function RegisterComponent() {
                 {fullNameError && <div className="text-danger">{fullNameError}</div>}
             </div>
             <div className="text-center mt-4">
-                <button className="btn btn-primary register-btn" onClick={handleRegister}>
-                    Register
+                <button className="btn btn-primary register-btn" onClick={handleRegister} disabled={loading}>
+                    {loading ? <Spinner animation="border" size="sm" /> : 'Register'}
                 </button>
             </div>
             <div className="register-link">
