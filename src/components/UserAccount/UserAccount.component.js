@@ -174,25 +174,26 @@ function UserAccountComponent({user}) {
     };
 
     const handleGenerate2FA = async () => {
-        setLoadingGenerate2FA(true); // Start loading
+    setLoadingGenerate2FA(true);
         try {
             const response = await generate2FA(user._id, password);
             setQrCode(response.qrCode);
             setSecretKey(response.secret);
             setCooldown(true);
-            setCooldownTimer(60); // Start a 30-second cooldown
+        setCooldownTimer(60); // 60 seconds cooldown
         } catch (error) {
             setCooldown(false);
             if (error.response && error.response.status === 429) {
-                toast.error(error.response.data.message);
-            } else if (error.response && error.response.status === 400) {
-                toast.error(error.response.data.message);
+            toast.error('Too many attempts. Please try again later.');
+            }else if (error.response && error.response.data.message === 'Invalid password') {
+                toast.error('Invalid password. Please try again.');
+        } else if (error.response && error.response.data.message === '2FA is already enabled. Please disable it first if you want to reset.') {
+            toast.error('2FA is already enabled. Disable it first to reset.');
             } else {
-                console.error('Error generating 2FA QR code:', error);
-                toast.error('Failed to generate QR code. Please try again.');
+            toast.error('Failed to generate 2FA QR code. Please try again.');
             }
         } finally {
-            setLoadingGenerate2FA(false); // Stop loading
+        setLoadingGenerate2FA(false);
         }
     };
 
@@ -211,24 +212,25 @@ function UserAccountComponent({user}) {
     };
 
     const handleValidate2FA = async () => {
-        setLoadingValidate2FA(true); // Start loading
+    setLoadingValidate2FA(true);
         try {
             const response = await verify2FA(user._id, token);
             if (response.success) {
                 await handleEnable2FA();
                 setIs2FAEnabled(true);
             } else {
-                console.error('Invalid 2FA token');
                 toast.error('Invalid 2FA token. Please try again.');
             }
         } catch (error) {
-            console.error('Error validating 2FA token:', error);
+        if (error.response && error.response.data.message) {
+            toast.error(`Failed to validate 2FA token: ${error.response.data.message}`);
+        } else {
             toast.error('Failed to validate 2FA token. Please try again.');
+        }
         } finally {
-            setLoadingValidate2FA(false); // Stop loading
+        setLoadingValidate2FA(false);
         }
     };
-
     const handleEnable2FA = async () => {
         try {
             await enable2FA(user._id, password, token);
@@ -486,9 +488,9 @@ function UserAccountComponent({user}) {
                         </>
                     ) : (
                         <>
-                            <Button style={{margin: 10}} variant="primary"
+                            <Button style={{margin: 5}} variant="primary"
                                 onClick={handleGenerate2FA} disabled={!password || cooldown || loadingGenerate2FA}>
-                                {loadingGenerate2FA ? <Spinner animation="border" size="sm" /> : (cooldown ? `Cooldown... ${cooldownTimer}s` : 'Generate QR Code')}
+                                {loadingGenerate2FA ? <Spinner animation="border" size="sm" /> : (cooldown ? `Cooldown ${cooldownTimer}s` : 'Generate QR Code')}
                             </Button>
                             {qrCode && (
                                 <>
