@@ -180,7 +180,7 @@ function UserAccountComponent({user}) {
             setQrCode(response.qrCode);
             setSecretKey(response.secret);
             setCooldown(true);
-            setCooldownTimer(30); // Start a 30-second cooldown
+            setCooldownTimer(60); // Start a 30-second cooldown
         } catch (error) {
             setCooldown(false);
             if (error.response && error.response.status === 429) {
@@ -453,7 +453,7 @@ function UserAccountComponent({user}) {
                 </Modal.Footer>
             </Modal>
 
-            <Modal show={show2FAModal} centered={true} onHide={handleClose2FAModal}>
+            <Modal scrollable={true}  show={show2FAModal} centered={true} onHide={handleClose2FAModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>{is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}</Modal.Title>
                 </Modal.Header>
@@ -461,7 +461,7 @@ function UserAccountComponent({user}) {
                     <input
                         type="password"
                         placeholder="Enter your password"
-                        style={{marginBottom: '10px', margin: '10px 0'}}
+                        style={{marginBottom: '10px'}}
                         value={password}
                         required
                         onChange={(e) => setPassword(e.target.value)}
