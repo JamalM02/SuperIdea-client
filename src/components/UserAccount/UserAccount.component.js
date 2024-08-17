@@ -468,7 +468,7 @@ function UserAccountComponent({user}) {
                     />
                     {is2FAEnabled ? (
                         <>
-
+                            <br/>
                             <input
                                 type="text"
                                 placeholder="Enter 2FA token"

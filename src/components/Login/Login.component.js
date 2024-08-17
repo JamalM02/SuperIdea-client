@@ -1,19 +1,22 @@
-import React, {useState, useEffect} from 'react';
-import {useNavigate, useLocation} from 'react-router-dom';
-import {loginUser, verify2FA} from '../../services/api.service';
-import {toast} from 'react-toastify';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { loginUser, verify2FA } from '../../services/api.service';
+import { toast } from 'react-toastify';
+import { Button, Spinner, Modal } from "react-bootstrap";
 import './Login.component.css';
-import {Button, Spinner} from "react-bootstrap";
 
-function LoginComponent({setUser}) {
+function LoginComponent({ setUser }) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [token, setToken] = useState('');
+    const [userId, setUserId] = useState(null);
+    const [loadingLogin, setLoadingLogin] = useState(false);
+    const [loadingVerify, setLoadingVerify] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
-    const [loadingLogin, setLoadingLogin] = useState(false);
-
 
     useEffect(() => {
         if (location.state && location.state.email) {
@@ -44,22 +47,12 @@ function LoginComponent({setUser}) {
             const normalizedEmail = email.toLowerCase();
 
             try {
-                const response = await loginUser({email: normalizedEmail, password});
+                const response = await loginUser({ email: normalizedEmail, password });
                 if (response) {
                     if (response.isTwoFactorEnabled) {
-                        // Prompt for 2FA token
-                        const token = prompt('Enter your 2FA token');
-                        const verificationResponse = await verify2FA(response._id, token);
-                        if (verificationResponse.success) {
-                            localStorage.setItem('user', JSON.stringify(response));
-                            setUser(response);
-                            toast.success('Logged-in successfully!');
-                            navigate('/user-account');
-                        } else {
-                            toast.error('Invalid 2FA token');
-                        }
+                        setUserId(response._id);
+                        setShow2FAModal(true);
                     } else {
-                        // If 2FA is not enabled, proceed as usual
                         localStorage.setItem('user', JSON.stringify(response));
                         setUser(response);
                         toast.success('Logged-in successfully!');
@@ -75,6 +68,29 @@ function LoginComponent({setUser}) {
             toast.error('Failed to login');
         } finally {
             setLoadingLogin(false);
+        }
+    };
+
+    const handleVerify2FA = async () => {
+        setLoadingVerify(true);
+        try {
+            const verificationResponse = await verify2FA(userId, token);
+            if (verificationResponse.success) {
+                const response = await loginUser({ email: email.toLowerCase(), password });
+                if (response) {
+                    localStorage.setItem('user', JSON.stringify(response));
+                    setUser(response);
+                    toast.success('Logged-in successfully!');
+                    navigate('/user-account');
+                }
+            } else {
+                toast.error('Invalid 2FA token');
+            }
+        } catch (error) {
+            console.error('Failed to verify 2FA', error);
+            toast.error('Failed to verify 2FA token');
+        } finally {
+            setLoadingVerify(false);
         }
     };
 
@@ -115,6 +131,31 @@ function LoginComponent({setUser}) {
                     <a href="/register" className="text-muted">Don't have an account? Register</a>
                 </small>
             </div>
+
+            {/* 2FA Modal */}
+            <Modal show={show2FAModal} onHide={() => setShow2FAModal(false)} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Two-Factor Authentication</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>Please enter your 2FA token:</p>
+                    <input
+                        type="text"
+                        className="form-control"
+                        value={token}
+                        onChange={(e) => setToken(e.target.value)}
+                        placeholder="Enter 2FA token"
+                    />
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={() => setShow2FAModal(false)}>
+                        Cancel
+                    </Button>
+                    <Button variant="primary" onClick={handleVerify2FA} disabled={loadingVerify}>
+                        {loadingVerify ? <Spinner animation="border" size="sm" /> : 'Verify'}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </div>
     );
 }
