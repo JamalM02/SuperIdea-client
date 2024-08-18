@@ -35,13 +35,25 @@ function App() {
   const location = useLocation();
   const inactivityTimer = useRef(null);
 
-  const handleLogout = useCallback(() => {
-    localStorage.removeItem('user');
-    setUser(null);
-    navigate('/home');
-    toast.success('Logged out successfully!');
-    setIsNavbarCollapsed(true); // Close the navbar after logout
-  }, [navigate]);
+  function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func.apply(this, args), wait);
+    };
+  }
+
+  const handleLogout = useCallback(
+      debounce(() => {
+        localStorage.removeItem('user');
+        setUser(null);
+        navigate('/home');
+        toast.success('Logged out successfully!');
+        setIsNavbarCollapsed(true); // Close the navbar after logout
+      }, 300), // 300ms debounce time
+      [navigate]
+  );
+
 
   useEffect(() => {
     const storedUser = JSON.parse(localStorage.getItem('user'));
@@ -78,6 +90,7 @@ function App() {
       clearTimeout(inactivityTimer.current);
     };
   }, [handleLogout]);
+
 
   useEffect(() => {
     setIsNavbarCollapsed(true); // Collapse the navbar on route change
