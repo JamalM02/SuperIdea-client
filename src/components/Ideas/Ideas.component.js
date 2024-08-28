@@ -315,11 +315,13 @@ function Ideas() {
                         </small>
                     </div>
                     <Button className="upload-button" onClick={() => setShowFileUploadModal(true)}>Upload Files</Button>
-                    <p style={{color: 'lightblue' }}>Number of uploaded files: {files.length}/{MAX_FILE_COUNT}</p>
+                    <br/><p1 style={{color: 'lightblue'}}>Number of uploaded files: {files.length}/{MAX_FILE_COUNT}</p1>
+                    <br/><p2 style={{color: 'red'}}>More than 9 files? Upload ZIP </p2>
                     <ul className="uploaded-files-list">
                         {files.map((file, index) => (
                             <li key={index}>
-                                {file.name} <Button variant="link" onClick={() => handleFileRemove(index)}>Remove</Button>
+                                {file.name} <Button variant="link"
+                                                    onClick={() => handleFileRemove(index)}>Remove</Button>
                             </li>
                         ))}
                     </ul>
