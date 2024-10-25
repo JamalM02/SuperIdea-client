@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { fetchIdeas, createIdea, likeIdea, fetchZipContents } from '../../services/api.service';
-import { toast } from 'react-toastify';
-import { Modal, Button, Tooltip, Overlay, Spinner } from 'react-bootstrap';
+import React, {useState, useEffect, useRef} from 'react';
+import {fetchIdeas, createIdea, likeIdea, fetchZipContents, fetchTopContributors} from '../../services/api.service';
+import {toast} from 'react-toastify';
+import {Modal, Button, Tooltip, Overlay, Spinner} from 'react-bootstrap';
 import './Ideas.component.css';
 import '../Style/ModalStyle.component.css';
-import { formatDistanceToNow } from 'date-fns/esm';
+import {formatDistanceToNow} from 'date-fns/esm';
 import FileUploadModal from './FileUploadModal/FileUploadModal';
 import FileContentsModal from './FileUploadModal/FileContentsModal';
 
@@ -61,7 +61,7 @@ function Ideas() {
     const [showFileContentsModal, setShowFileContentsModal] = useState(false);
     const [fileContents, setFileContents] = useState([]);
     const [showUploadedFilesModal, setShowUploadedFilesModal] = useState(false);
-
+    const [topContributors, setTopContributors] = useState([]);
     const abortControllerRef = useRef(null);
 
     useEffect(() => {
@@ -81,9 +81,20 @@ function Ideas() {
         };
 
         fetchAllIdeas();
+
+        const fetchContributors = async () => {
+            try {
+                const contributors = await fetchTopContributors();
+                setTopContributors(contributors.map(contributor => contributor._id)); // Store the contributor IDs
+            } catch (error) {
+                console.error('Error fetching top contributors', error);
+            }
+        };
+
+        fetchContributors();
     }, []);
 
-        const handleAddIdea = async () => {
+    const handleAddIdea = async () => {
         if (title.trim() === '' || description.trim() === '') {
             toast.warning('Title and description are required');
             return;
@@ -163,7 +174,7 @@ function Ideas() {
     const handleLike = async (ideaId) => {
         const user = JSON.parse(localStorage.getItem('user'));
 
-        setLoadingLikes(prevLoadingLikes => ({ ...prevLoadingLikes, [ideaId]: true }));
+        setLoadingLikes(prevLoadingLikes => ({...prevLoadingLikes, [ideaId]: true}));
 
         setIdeas(prevIdeas => {
             return prevIdeas.map(idea => {
@@ -178,7 +189,7 @@ function Ideas() {
                     } else {
                         return {
                             ...idea,
-                            likes: [...idea.likes, { _id: user._id, fullName: user.fullName, type: user.type }],
+                            likes: [...idea.likes, {_id: user._id, fullName: user.fullName, type: user.type}],
                             likesCount: idea.likesCount + 1
                         };
                     }
@@ -205,7 +216,7 @@ function Ideas() {
                         } else {
                             return {
                                 ...idea,
-                                likes: [...idea.likes, { _id: user._id, fullName: user.fullName, type: user.type }],
+                                likes: [...idea.likes, {_id: user._id, fullName: user.fullName, type: user.type}],
                                 likesCount: idea.likesCount + 1
                             };
                         }
@@ -215,7 +226,7 @@ function Ideas() {
             });
             alert('Failed to like/unlike idea');
         } finally {
-            setLoadingLikes(prevLoadingLikes => ({ ...prevLoadingLikes, [ideaId]: false }));
+            setLoadingLikes(prevLoadingLikes => ({...prevLoadingLikes, [ideaId]: false}));
         }
     };
 
@@ -233,12 +244,12 @@ function Ideas() {
     };
 
     const handleCloseModal = () => {
-    if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-    }
-    resetForm();
-    setShowModal(false);
-};
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort();
+        }
+        resetForm();
+        setShowModal(false);
+    };
 
 
     const handleDownload = (fileId) => {
@@ -275,12 +286,14 @@ function Ideas() {
         setShowUploadedFilesModal(false);
     };
 
+    let user = JSON.parse(localStorage.getItem('user'));
     return (
         <div className="ideas-container">
             <div className="page-title-container">
                 <div className="title-subtitle-container">
                     <div className="page-title">Posts</div>
-                    <p className="page-subtitle">Share between Students and Lecturers and contribute to the Students' Community!</p>
+                    <p className="page-subtitle">Share between Students and Lecturers and contribute to the Students'
+                        Community!</p>
                 </div>
                 <Button onClick={() => setShowModal(true)} className="create-idea-button">
                     Create New Post
@@ -315,8 +328,10 @@ function Ideas() {
                         </small>
                     </div>
                     <Button className="upload-button" onClick={() => setShowFileUploadModal(true)}>Upload Files</Button>
-                    <br/><p1 style={{color: 'lightblue'}}>Number of uploaded files: {files.length}/{MAX_FILE_COUNT}</p1>
-                    <br/><p2 style={{color: 'red'}}>More than 9 files? Upload ZIP </p2>
+                    <br/>
+                    <p1 style={{color: 'lightblue'}}>Number of uploaded files: {files.length}/{MAX_FILE_COUNT}</p1>
+                    <br/>
+                    <p2 style={{color: 'red'}}>More than 9 files? Upload ZIP</p2>
                     <ul className="uploaded-files-list">
                         {files.map((file, index) => (
                             <li key={index}>
@@ -331,7 +346,7 @@ function Ideas() {
                         Cancel
                     </Button>
                     <Button variant="success" onClick={handleAddIdea} disabled={loadingSubmit}>
-                        {loadingSubmit ? <Spinner animation="border" size="sm" /> : 'Submit'}
+                        {loadingSubmit ? <Spinner animation="border" size="sm"/> : 'Submit'}
                     </Button>
                 </Modal.Footer>
             </Modal>
@@ -342,7 +357,8 @@ function Ideas() {
                 handleFilesSubmit={handleFileUpload}
             />
 
-            <Modal show={showUploadedFilesModal} onHide={handleCloseUploadedFilesModal} centered className="custom-modal">
+            <Modal show={showUploadedFilesModal} onHide={handleCloseUploadedFilesModal} centered
+                   className="custom-modal">
                 <Modal.Header closeButton>
                     <Modal.Title>Uploaded Files</Modal.Title>
                 </Modal.Header>
@@ -369,10 +385,12 @@ function Ideas() {
                     ideas.map((idea) => (
                         <div key={idea._id} className="idea-bubble">
                             <div className="creator">
+                                {topContributors.includes(idea.user._id) && (
+                                    <span role="img" aria-label="trophy">🏆</span>
+                                )}
                                 {`${idea.user.fullName} (${idea.user.type})`}
-                                {idea.user.topContributor && <span role="img" aria-label="trophy">🏆</span>}
                                 <span className="post-time">
-                                    {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
+                                {` - ${formatDistanceToNow(new Date(idea.createdAt))} ago`}
                                 </span>
                             </div>
                             <div className="description">{idea.description}</div>
@@ -381,7 +399,8 @@ function Ideas() {
                                     {idea.files.map(file => (
                                         <div key={file._id} className="file-item">
                                             <button onClick={() => handleDownload(file._id)} className="file-button">
-                                                <img src={getFileIcon(file.fileName)} alt="File Icon" className="file-icon"/>
+                                                <img src={getFileIcon(file.fileName)} alt="File Icon"
+                                                     className="file-icon"/>
                                                 <div className="file-name">
                                                     {file.fileName}
                                                 </div>
