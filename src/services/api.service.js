@@ -215,4 +215,9 @@ export const check2FAStatus = async (userId) => {
     }
 };
 
+export const rateIdea = async (ideaId, userId, rating) => {
+    const response = await axios.post(`${API_URL}/ideas/${ideaId}/rate`, { userId, rating });
+    return response.data;
+};
+
 

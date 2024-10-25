@@ -1,5 +1,12 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {fetchIdeas, createIdea, likeIdea, fetchZipContents, fetchTopContributors} from '../../services/api.service';
+import {
+    fetchIdeas,
+    createIdea,
+    likeIdea,
+    fetchZipContents,
+    fetchTopContributors,
+    rateIdea
+} from '../../services/api.service';
 import {toast} from 'react-toastify';
 import {Modal, Button, Tooltip, Overlay, Spinner} from 'react-bootstrap';
 import './Ideas.component.css';
@@ -23,6 +30,8 @@ const retry = async (fn, retriesLeft = 5, interval = 1000) => {
 };
 
 const getFileIcon = (fileName) => {
+    if (!fileName) return '/file-icon.png'; // Return a default icon if fileName is undefined
+
     const extension = fileName.split('.').pop().toLowerCase();
     switch (extension) {
         case 'pdf':
@@ -63,6 +72,8 @@ function Ideas() {
     const [showUploadedFilesModal, setShowUploadedFilesModal] = useState(false);
     const [topContributors, setTopContributors] = useState([]);
     const abortControllerRef = useRef(null);
+    const [selectedRating, setSelectedRating] = useState({}); // To track selected rating for each idea
+
 
     useEffect(() => {
         const fetchAllIdeas = async () => {
@@ -286,6 +297,22 @@ function Ideas() {
         setShowUploadedFilesModal(false);
     };
 
+    const handleRateIdea = async (ideaId, rating) => {
+        if (user.type !== 'Lecturer') return;
+
+        try {
+            const updatedIdea = await rateIdea(ideaId, user._id, rating);
+            setIdeas(prevIdeas => prevIdeas.map(idea => idea._id === ideaId ? updatedIdea : idea));
+            setSelectedRating(prevSelectedRating => ({
+                ...prevSelectedRating,
+                [ideaId]: rating // Update the selected rating for the specific idea
+            }));
+        } catch (error) {
+            console.error('Error rating idea:', error);
+        }
+    };
+
+
     let user = JSON.parse(localStorage.getItem('user'));
     return (
         <div className="ideas-container">
@@ -414,20 +441,43 @@ function Ideas() {
                                         </div>
                                     ))}
                                 </div>
+                                {/* Conditional rendering for like or rating based on user type */}
                                 <div className="actions">
-                                    <Button
-                                        onClick={() => handleLike(idea._id)}
-                                        variant="outline-success"
-                                        disabled={loadingLikes[idea._id]}
-                                    >
-                                        {idea.likes.some(like => like._id === JSON.parse(localStorage.getItem('user'))._id) ? 'Unlike' : 'Like'}
-                                    </Button>
-                                    <span
-                                        className="likes-counter"
-                                        onClick={(e) => handleShowLikes(e, idea.likes)}
-                                    >
-                                        {idea.likes.length}
-                                    </span>
+                                    {user.type === 'Student' ? (
+                                        <Button
+                                            onClick={() => handleLike(idea._id)}
+                                            variant="outline-success"
+                                            disabled={loadingLikes[idea._id]}
+                                        >
+                                            {idea.likes.some(like => like._id === user._id) ? 'Unlike' : 'Like'}
+                                        </Button>
+                                    ) : (
+                                        <div className="rating">
+                                            {[1, 2, 3, 4, 5].map(star => (
+                                                <span
+                                                    key={star}
+                                                    onClick={() => handleRateIdea(idea._id, star)}
+                                                    style={{
+                                                        cursor: 'pointer',
+                                                        color: star <= (idea.ratings.find(r => r.userId === user._id)?.rating || 0) ? 'gold' : 'gray'
+                                                    }}
+                                                >
+                                                ★
+                                            </span>
+                                            ))}
+                                            {/* Display selected rating next to stars */}
+                                            <span style={{ marginLeft: '8px', color: 'black' }}>
+                                            ({selectedRating[idea._id] || idea.ratings.find(r => r.userId === user._id)?.rating || 0})
+                                        </span>
+                                        </div>
+                                    )}
+                                    <span className="engagement-info">
+        {`Likes: ${idea.likes.length}, Average Rating: ${
+            idea.ratingCount > 0
+                ? (idea.totalRatings / idea.ratingCount).toFixed(1)
+                : 'No ratings'
+        }`}
+    </span>
                                 </div>
                             </div>
                         </div>
@@ -453,7 +503,7 @@ function Ideas() {
                                     })
                                     .map(like => (
                                         <li key={like._id}>
-                                            {like.fullName}
+                                        {like.fullName}
                                             <span className="like-user-type">({like.type})</span>
                                         </li>
                                     ))}
