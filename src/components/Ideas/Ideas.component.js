@@ -426,12 +426,18 @@ function Ideas() {
                     <Modal.Body>
                         {showLikes.length > 0 ? (
                             <ul>
-                                {showLikes.map(like => (
-                                    <li key={like._id}>
-                                        {like.fullName}
-                                        <span className="like-user-type">({like.type})</span>
-                                    </li>
-                                ))}
+                                {showLikes
+                                    .sort((a, b) => {
+                                        if (a.type === 'Lecturer' && b.type !== 'Lecturer') return -1;
+                                        if (a.type !== 'Lecturer' && b.type === 'Lecturer') return 1;
+                                        return 0;
+                                    })
+                                    .map(like => (
+                                        <li key={like._id}>
+                                            {like.fullName}
+                                            <span className="like-user-type">({like.type})</span>
+                                        </li>
+                                    ))}
                             </ul>
                         ) : (
                             <span>No likes yet</span>
@@ -444,6 +450,7 @@ function Ideas() {
                     </Modal.Footer>
                 </Modal>
             )}
+
 
             <FileContentsModal
                 show={showFileContentsModal}
