@@ -121,12 +121,13 @@ export const fetchZipContents = async (fileId) => {
 export const fetchTopContributors = async () => {
     try {
         const response = await axios.get(`${API_URL}/users/top-contributors`);
-        return response.data;
+        return response.data.sort((a, b) => b.score - a.score); // Sort contributors by score in descending order
     } catch (error) {
         console.error('Error fetching top contributors', error);
         throw error;
     }
 };
+
 
 export const checkUserExistence = async (userData) => {
     try {

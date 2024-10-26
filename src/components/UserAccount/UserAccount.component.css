@@ -48,8 +48,9 @@
 }
 
 .user-achievements{
+    font-weight: bold;
     font-size: 1.5rem;
-    color: black;
+    color: rgba(255, 0, 0, 0.62);
 }
 
 .user-ideas,
@@ -124,7 +125,8 @@
     color: white;
 }
 
-.like-click {
+.like-click,
+.rating-click{
     cursor: pointer;
     color: #0970d6;
 }

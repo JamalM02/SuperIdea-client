@@ -14,10 +14,10 @@ import '../Style/ModalStyle.component.css';
 import {formatDistanceToNow} from 'date-fns/esm';
 import FileUploadModal from './FileUploadModal/FileUploadModal';
 import FileContentsModal from './FileUploadModal/FileContentsModal';
-
 const DESCRIPTION_CHARACTER_LIMIT = 300;
 const TITLE_CHARACTER_LIMIT = 20;
 const MAX_FILE_COUNT = 9;
+
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
@@ -53,6 +53,7 @@ const getFileIcon = (fileName) => {
 };
 
 function Ideas() {
+    const totalRatings = 1;
     const [ideas, setIdeas] = useState([]);
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -241,10 +242,6 @@ function Ideas() {
         }
     };
 
-    const handleShowLikes = (event, likes) => {
-        setShowLikes(likes);
-        setTarget(event.target);
-    };
 
     const resetForm = () => {
         setTitle('');

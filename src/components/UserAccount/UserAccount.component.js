@@ -17,6 +17,9 @@ import {io} from 'socket.io-client';
 import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
 import { FaApple, FaGooglePlay } from "react-icons/fa";
+const IdeasScoreWeight = 40;
+let LikesScoreWeight = 20;
+let AvrRatingScoreWeight = 40;
 
 const socket = io(process.env.REACT_APP_API_URL_DEV);
 const ServiceName = 'ScholarShareNet';
@@ -36,6 +39,7 @@ function UserAccountComponent({user}) {
     const [ideas, setIdeas] = useState([]);
     const [report, setReport] = useState(null);
     const [showLikes, setShowLikes] = useState(null);
+    const [showRatings, setShowRatings] = useState(null); // State to manage the ratings modal
     const [showModal, setShowModal] = useState(false);
     const [topContributors, setTopContributors] = useState([]);
     const [loadingTopContributors, setLoadingTopContributors] = useState(false);
@@ -59,6 +63,7 @@ function UserAccountComponent({user}) {
     const [cooldownTimer, setCooldownTimer] = useState(0); // Timer state
     const [is2FAEnabled, setIs2FAEnabled] = useState(false);
     const [secret, setSecretKey] = useState('');
+    const [showScoreInfoModal, setShowScoreInfoModal] = useState(false); // Modal state
 
     // Loading states for actions
     const [loadingGenerate2FA, setLoadingGenerate2FA] = useState(false);
@@ -153,8 +158,8 @@ function UserAccountComponent({user}) {
         setLoadingTopContributors(true);
         setErrorTopContributors(null);
         try {
-            const response = await retry(fetchTopContributors);
-            setTopContributors(response.filter((contributor) => contributor.totalIdeas > 0));
+            const response = await retry(fetchTopContributors); // Already sorted by backend
+            setTopContributors(response); // Just set response directly
         } catch (error) {
             console.error('Failed to fetch top contributors', error);
             setErrorTopContributors('Failed to load top contributors');
@@ -163,14 +168,23 @@ function UserAccountComponent({user}) {
         }
     };
 
+
+
+
     const handleShowLikes = (likes) => {
         setShowLikes(likes);
+        setShowModal(true);
+    };
+
+    const handleShowRatings = (ratings) => {
+        setShowRatings(ratings);
         setShowModal(true);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
         setShowLikes(null);
+        setShowRatings(null);
     };
 
     const handleGenerate2FA = async () => {
@@ -288,6 +302,10 @@ function UserAccountComponent({user}) {
         setCooldown(false);
     };
 
+    const handleShowScoreInfoModal = () => setShowScoreInfoModal(true);
+    const handleCloseScoreInfoModal = () => setShowScoreInfoModal(false);
+
+
     return (
         <div className="user-account-wrapper">
             <div className="user-page-title-container">
@@ -334,8 +352,9 @@ function UserAccountComponent({user}) {
                         <p className="error">{errorAchievements}</p>
                     ) : achievements ? (
                         <p className="user-achievements">
-                            Posts: {achievements.totalIdeas} likes: {achievements.totalLikes}
+                            Score: {achievements.score}
                         </p>
+
                     ) : null}
                 </div>
                 <div className="user-ideas-table-wrapper">
@@ -349,14 +368,28 @@ function UserAccountComponent({user}) {
                             <tr>
                                 <th>Post's Subject</th>
                                 <th>Likes</th>
+                                <th>Average Rating</th>
                             </tr>
                             </thead>
                             <tbody>
                             {ideas.map((idea) => (
                                 <tr key={idea._id}>
-                                    <td className="subject-field">{idea.title} {idea.user && idea.user.topContributor ? '🏆' : ''}</td>
-                                    <td className="like-click" onClick={() => handleShowLikes(idea.likes)}
-                                        style={{cursor: 'pointer'}}>{idea.likesCount}</td>
+                                    <td className="subject-field">{idea.title}</td>
+                                    <td
+                                        className="like-click"
+                                        onClick={() => handleShowLikes(idea.likes)}
+                                    >
+                                        {idea.likesCount}
+                                    </td>
+                                    <td
+                                        className="rating-click"
+                                        onClick={() => handleShowRatings(idea.ratings)}
+                                    >
+                                        {idea.ratingCount > 0
+                                            ? (idea.totalRatings / idea.ratingCount).toFixed(1)
+                                            : 'No ratings'}
+                                    </td>
+
                                 </tr>
                             ))}
                             </tbody>
@@ -369,6 +402,8 @@ function UserAccountComponent({user}) {
 
             <div className="top-contributors">
                 <div className="user-reports-title">Top 3 Contributors 🏆</div>
+                Weekly top contributors based on their score.
+                <a href="#" onClick={handleShowScoreInfoModal}>Learn more</a>
                 <div className="top-contributors-table-wrapper">
                     {loadingTopContributors ? (
                         <p className="loading">Loading top contributors...</p>
@@ -382,6 +417,7 @@ function UserAccountComponent({user}) {
                                 <th>Role</th>
                                 <th>Likes</th>
                                 <th>Posts</th>
+                                <th>Score</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -391,6 +427,8 @@ function UserAccountComponent({user}) {
                                     <td>{contributor.type}</td>
                                     <td>{contributor.totalLikes}</td>
                                     <td>{contributor.totalIdeas}</td>
+                                    <td>{contributor.score}</td>
+                                    {/* Display avgRating */}
                                 </tr>
                             ))}
                             </tbody>
@@ -433,7 +471,7 @@ function UserAccountComponent({user}) {
 
             <Modal show={showModal} onHide={handleCloseModal} centered className="custom-modal">
                 <Modal.Header closeButton>
-                    <Modal.Title>Likes</Modal.Title>
+                    <Modal.Title>{showLikes ? 'Likes' : 'Ratings'}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     {showLikes && showLikes.length > 0 ? (
@@ -444,8 +482,17 @@ function UserAccountComponent({user}) {
                                 </li>
                             ))}
                         </ul>
+                    ) : showRatings && showRatings.length > 0 ? (
+                        <ul>
+                            {showRatings.map((rating) => (
+                                <li key={rating.userId._id}>
+                                    ★ {rating.userId.fullName} - Rated: {rating.rating}
+                                </li>
+                            ))}
+                        </ul>
+
                     ) : (
-                        <span>No likes yet</span>
+                        <span>No {showLikes ? 'likes' : 'ratings'} yet</span>
                     )}
                 </Modal.Body>
                 <Modal.Footer>
@@ -455,7 +502,7 @@ function UserAccountComponent({user}) {
                 </Modal.Footer>
             </Modal>
 
-            <Modal scrollable={true}  show={show2FAModal} centered={true} onHide={handleClose2FAModal}>
+            <Modal scrollable={true} show={show2FAModal} centered={true} onHide={handleClose2FAModal}>
                 <Modal.Header closeButton>
                     <Modal.Title>{is2FAEnabled ? 'Disable 2FA' : 'Enable 2FA'}</Modal.Title>
                 </Modal.Header>
@@ -481,23 +528,25 @@ function UserAccountComponent({user}) {
                             <br/>
                             <Button style={{margin: '10px 0'}} variant="danger"
                                     onClick={handleDisable2FA}
-                                disabled={!password || !token || loadingDisable2FA}
+                                    disabled={!password || !token || loadingDisable2FA}
                             >
-                                {loadingDisable2FA ? <Spinner animation="border" size="sm" /> : 'Disable 2FA'}
+                                {loadingDisable2FA ? <Spinner animation="border" size="sm"/> : 'Disable 2FA'}
                             </Button>
                         </>
                     ) : (
                         <>
                             <Button style={{margin: 5}} variant="primary"
-                                onClick={handleGenerate2FA} disabled={!password || cooldown || loadingGenerate2FA}>
-                                {loadingGenerate2FA ? <Spinner animation="border" size="sm" /> : (cooldown ? `Cooldown ${cooldownTimer}s` : 'Generate QR Code')}
+                                    onClick={handleGenerate2FA} disabled={!password || cooldown || loadingGenerate2FA}>
+                                {loadingGenerate2FA ? <Spinner animation="border"
+                                                               size="sm"/> : (cooldown ? `Cooldown ${cooldownTimer}s` : 'Generate QR Code')}
                             </Button>
                             {qrCode && (
                                 <>
                                     <img src={qrCode} alt="QR Code" style={{width: '200px', marginTop: '10px'}}/><br/>
                                     <a>Service: <strong>{ServiceName}</strong></a><br/>
                                     <Button onClick={handleCopyToClipboard} disabled={loadingCopySecret}>
-                                        {loadingCopySecret ? <Spinner animation="border" size="sm" /> : 'Copy Secret Key'}
+                                        {loadingCopySecret ?
+                                            <Spinner animation="border" size="sm"/> : 'Copy Secret Key'}
                                     </Button>
                                     <p><strong>NOTE: Click the button to Copy the key and paste it into your
                                         authenticator app manually.</strong></p>
@@ -510,9 +559,9 @@ function UserAccountComponent({user}) {
                                     />
                                     <Button style={{margin: '10px 10px'}} variant="success"
                                             onClick={handleValidate2FA}
-                                        disabled={!password || !token || loadingValidate2FA}
+                                            disabled={!password || !token || loadingValidate2FA}
                                     >
-                                        {loadingValidate2FA ? <Spinner animation="border" size="sm" /> : 'Enable 2FA'}
+                                        {loadingValidate2FA ? <Spinner animation="border" size="sm"/> : 'Enable 2FA'}
                                     </Button>
                                     <br/>
                                     <p1>For Example:</p1>
@@ -535,8 +584,7 @@ function UserAccountComponent({user}) {
                                         </div>
                                     </div>
 
-
-                                    <div style={{marginTop: 10,display: 'flex', gap: '20px', alignItems: 'center'}}>
+                                    <div style={{marginTop: 10, display: 'flex', gap: '20px', alignItems: 'center'}}>
                                         <p3 style={{fontWeight: "bold"}}>Download Microsoft Authenticator:</p3>
                                         <div style={{textAlign: 'center'}}>
                                             <a href="https://play.google.com/store/apps/details?id=com.azure.authenticator&hl=en&gl=US"
@@ -558,6 +606,27 @@ function UserAccountComponent({user}) {
                         </>
                     )}
                 </Modal.Body>
+            </Modal>
+            {/* Score Information Modal */}
+            <Modal show={showScoreInfoModal} onHide={handleCloseScoreInfoModal} centered>
+                <Modal.Header closeButton>
+                    <Modal.Title>Score Calculation Information</Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>The top contributors list is updated weekly, highlighting the top 3 users based on their score.</p>
+                    <p><strong>Score Calculation:</strong></p>
+                    <ul>
+                        <li><strong>Ideas:</strong> {IdeasScoreWeight}% weight</li>
+                        <li><strong>Likes:</strong> {LikesScoreWeight}% weight</li>
+                        <li><strong>Average Rating:</strong> {AvrRatingScoreWeight}% weight</li>
+                    </ul>
+                    <p>Each user's score is recalculated every week, considering their total ideas, likes, and average rating.</p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button variant="secondary" onClick={handleCloseScoreInfoModal}>
+                        Close
+                    </Button>
+                </Modal.Footer>
             </Modal>
         </div>
     );
