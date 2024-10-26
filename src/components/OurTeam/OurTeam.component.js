@@ -52,32 +52,6 @@ function OurTeamComponent() {
                     <div className="row">
                         <div className="column">
                             <div className="card">
-                                <img src={MatanProf} alt="Matan Shabi" style={{width: '100%'}}/>
-                                <div className="container">
-                                    <h2>Matan Shabi</h2>
-                                    <p className="title">Co-Founder</p>
-                                    <div className="social-media">
-                                        <a href="https://www.linkedin.com/in/matan-shabi/" target="_blank"
-                                           rel="noopener noreferrer">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png"
-                                                 alt="LinkedIn" className="social-icon"/>
-                                        </a>
-                                        <a href="https://github.com/MaTaN-DeHater" target="_blank"
-                                           rel="noopener noreferrer">
-                                            <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png"
-                                                 alt="GitHub" className="social-icon"/>
-                                        </a>
-                                        <a href={`mailto:${MatanMail}`}>
-                                            <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Email"
-                                                 className="social-icon"/>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="column">
-                            <div className="card">
                                 <img src={JamalProf} alt="Jamal Majadle" style={{width: '100%'}}/>
                                 <div className="container">
                                     <h2>Jamal Majadle</h2>
@@ -94,6 +68,31 @@ function OurTeamComponent() {
                                                  alt="GitHub" className="social-icon"/>
                                         </a>
                                         <a href={`mailto:${JamalMail}`}>
+                                            <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Email"
+                                                 className="social-icon"/>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="column">
+                            <div className="card">
+                                <img src={MatanProf} alt="Matan Shabi" style={{width: '100%'}}/>
+                                <div className="container">
+                                    <h2>Matan Shabi</h2>
+                                    <p className="title">Co-Founder</p>
+                                    <div className="social-media">
+                                        <a href="https://www.linkedin.com/in/matan-shabi/" target="_blank"
+                                           rel="noopener noreferrer">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/174/174857.png"
+                                                 alt="LinkedIn" className="social-icon"/>
+                                        </a>
+                                        <a href="https://github.com/MaTaN-DeHater" target="_blank"
+                                           rel="noopener noreferrer">
+                                            <img src="https://cdn-icons-png.flaticon.com/512/733/733553.png"
+                                                 alt="GitHub" className="social-icon"/>
+                                        </a>
+                                        <a href={`mailto:${MatanMail}`}>
                                             <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" alt="Email"
                                                  className="social-icon"/>
                                         </a>
@@ -121,7 +120,8 @@ function OurTeamComponent() {
                         are responsible for maintaining the confidentiality of their login credentials and for all
                         activities that occur under their accounts.</p>
                     <h5 className={"section-title"}>User-Generated Content</h5>
-                    <p className={"section-details"}>Users can upload, share, and download study materials. By submitting content, users affirm
+                    <p className={"section-details"}>Users can upload, share, and download study materials. By
+                        submitting content, users affirm
                         that they own the rights or have the necessary permissions for the materials shared.
                         ScholarShareNet reserves the right to remove any content deemed inappropriate, copyrighted
                         without permission, or in violation of these terms.</p>
