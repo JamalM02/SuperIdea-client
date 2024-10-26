@@ -1,11 +1,16 @@
 .user-account-wrapper {
-    padding: 20px;
+    padding: 10px;
     background: linear-gradient(to right, rgba(33, 37, 41, 0.8), rgba(101, 117, 161, 0.64));
     border-radius: 10px;
     margin-top: -48px; /* Adjust this value to match the height of your navbar */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     max-width: 100%;
     color: white;
+}
+
+.container.mt-5 {
+    max-width: 100% !important; /* Adjust this value to what you need */
+    margin-top: 2rem !important;
 }
 
 .user-page-title-container {
@@ -87,11 +92,11 @@
 .user-ideas-table,
 .user-reports-table,
 .top-contributors-table {
-    width: 97%;
+    width: 100%;
     border-collapse: collapse;
     table-layout: fixed; /* Ensures that long words break properly */
     word-wrap: break-word; /* Ensures that long words break properly */
-    margin-left: 10px;
+    align-content: center;
 }
 
 .user-ideas-table th,
@@ -100,7 +105,7 @@
     padding: 10px;
     border: 2px solid rgba(1, 15, 31, 0.43);
     text-align: center;
-    font-size: 1rem;
+    font-size: 1.5rem;
     background: rgba(33, 37, 41, 0.79);
     color: white;
     word-break: break-word; /* Ensures that long words break properly */
@@ -113,7 +118,7 @@
     color: black;
     padding: 10px;
     border: 2px solid rgba(1, 15, 31, 0.43);
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     word-break: break-word; /* Ensures that long words break properly */
     overflow-wrap: break-word; /* Ensures that long words break properly */
 }
