@@ -86,3 +86,29 @@
     font-size: 1rem;
     color: black;
 }
+
+.register-form-group {
+    margin-top: 15px;
+    color: rgba(1, 15, 31, 0.43);
+}
+
+#terms {
+    margin-right: 10px;
+}
+
+.lecturer-contact {
+    color: rgba(224, 11, 72, 0.87);
+    margin-top: 10px;
+    text-align: center;
+}
+
+.lecturer-contact a {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+.lecturer-contact a:hover {
+    color: #0056b3;
+}
+
+

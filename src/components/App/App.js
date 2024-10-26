@@ -21,7 +21,6 @@ import { io } from 'socket.io-client';
 const API_URL = process.env.NODE_ENV === 'production' ? process.env.REACT_APP_API_URL_PROD : process.env.REACT_APP_API_URL_DEV;
 const SOCKET_URL = API_URL.replace('/api', '');
 const socket = io(SOCKET_URL);
-
 const INACTIVITY_TIMEOUT = 300000; // 5 minutes
 const PrivateRoute = ({ element, ...rest }) => {
     const isAuthenticated = localStorage.getItem('user');
@@ -106,7 +105,7 @@ function App() {
         { label: `Hi ${user ? user.fullName : ''}!`, path: '' },
         { path: '/user-account', label: 'My Profile' },
         { path: '/ideas', label: 'Posts' },
-        { path: '/our-team', label: 'Meet The Team' },
+        { path: '/our-team', label: 'About Us' },
         user && user.type === 'Admin' && { path: '/admin', label: 'Admin Page' } // Admin link
     ].filter(Boolean);
 
@@ -142,7 +141,7 @@ function App() {
                                     <Link className="nav-link" to="/home">Home</Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link" to="/our-team">Meet The Team</Link>
+                                    <Link className="nav-link" to="/our-team">About Us</Link>
                                 </li>
                                 {location.pathname !== '/home' && (
                                     <li className="nav-item">

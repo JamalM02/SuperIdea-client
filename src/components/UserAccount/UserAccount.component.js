@@ -18,11 +18,11 @@ import './UserAccount.component.css';
 import '../Style/ModalStyle.component.css';
 import { FaApple, FaGooglePlay } from "react-icons/fa";
 const IdeasScoreWeight = 40;
-let LikesScoreWeight = 20;
-let AvrRatingScoreWeight = 40;
+const LikesScoreWeight = 20;
+const AvrRatingScoreWeight = 40;
 
 const socket = io(process.env.REACT_APP_API_URL_DEV);
-const ServiceName = 'ScholarShareNet';
+const ServiceName = process.env.REACT_APP_SERVICE_NAME;
 
 const retry = async (fn, retriesLeft = 5, interval = 1000) => {
     try {
@@ -613,14 +613,14 @@ function UserAccountComponent({user}) {
                     <Modal.Title>Score Calculation Information</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <p>The top contributors list is updated weekly, highlighting the top 3 users based on their score.</p>
-                    <p><strong>Score Calculation:</strong></p>
+                    <p style={{color: 'black', textAlign:'center'}}>The top contributors list is updated weekly, highlighting the<br/> top 3 users based on their score.</p>
+                    <p style={{color: 'black'}}><strong>Score Calculation:</strong></p>
                     <ul>
                         <li><strong>Ideas:</strong> {IdeasScoreWeight}% weight</li>
                         <li><strong>Likes:</strong> {LikesScoreWeight}% weight</li>
                         <li><strong>Average Rating:</strong> {AvrRatingScoreWeight}% weight</li>
                     </ul>
-                    <p>Each user's score is recalculated every week, considering their total ideas, likes, and average rating.</p>
+                    <p style={{color: 'black', textAlign:'center'}}>Each user's score is recalculated every week, considering their total ideas, likes, and average rating.</p>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={handleCloseScoreInfoModal}>

@@ -355,7 +355,7 @@ function Ideas() {
                     <br/>
                     <p1 style={{color: 'lightblue'}}>Number of uploaded files: {files.length}/{MAX_FILE_COUNT}</p1>
                     <br/>
-                    <p2 style={{color: 'red'}}>More than 9 files? Upload ZIP</p2>
+                    <p2>More than 9 files? Upload ZIP</p2>
                     <ul className="uploaded-files-list">
                         {files.map((file, index) => (
                             <li key={index}>
@@ -463,18 +463,22 @@ function Ideas() {
                                             </span>
                                             ))}
                                             {/* Display selected rating next to stars */}
-                                            <span style={{ marginLeft: '8px', color: 'black' }}>
+                                            <span style={{marginLeft: '8px', color: 'black'}}>
                                             ({selectedRating[idea._id] || idea.ratings.find(r => r.userId === user._id)?.rating || 0})
                                         </span>
                                         </div>
                                     )}
-                                    <span className="engagement-info">
-        {`Likes: ${idea.likes.length}, Average Rating: ${
-            idea.ratingCount > 0
-                ? (idea.totalRatings / idea.ratingCount).toFixed(1)
-                : 'No ratings'
-        }`}
-    </span>
+                                    <div className="engagement-info">
+                                       <p>{`Likes: ${idea.likes.length}`}</p>
+                                        <p>
+                                            {`Average Rating: ${
+                                                idea.ratingCount > 0
+                                                    ? (idea.totalRatings / idea.ratingCount).toFixed(1)
+                                                    : 'No ratings'
+                                            }`}
+                                        </p>
+                                    </div>
+
                                 </div>
                             </div>
                         </div>
