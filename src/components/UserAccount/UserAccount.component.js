@@ -414,7 +414,6 @@ function UserAccountComponent({user}) {
                             <thead className="user-reports-thead">
                             <tr>
                                 <th>Name</th>
-                                <th>Role</th>
                                 <th>Likes</th>
                                 <th>Posts</th>
                                 <th>Score</th>
@@ -424,7 +423,6 @@ function UserAccountComponent({user}) {
                             {topContributors.map(contributor => (
                                 <tr key={contributor._id}>
                                     <td>{contributor.fullName}</td>
-                                    <td>{contributor.type}</td>
                                     <td>{contributor.totalLikes}</td>
                                     <td>{contributor.totalIdeas}</td>
                                     <td>{contributor.score}</td>
