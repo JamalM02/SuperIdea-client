@@ -50,7 +50,7 @@ function VerifyComponent() {
         const templateId = context === 'typeChange' ? process.env.REACT_APP_EMAILJS_ADMIN_TEMPLATE_ID : process.env.REACT_APP_EMAILJS_USER_TEMPLATE_ID;
         const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
         const templateParams = {
-            to_name: context === 'typeChange' ? adminName : formatFullName(fullName),
+            customer_name: context === 'typeChange' ? adminName : formatFullName(fullName),
             to_email: context === 'typeChange' ? 'scholarsharenet@gmail.com' : email.toLowerCase(),
             verification_code: code,
             from_name: adminName, // For new template
