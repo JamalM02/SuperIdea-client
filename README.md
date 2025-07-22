@@ -3,6 +3,9 @@
 ## Project Overview
 
 ScholarShareNet is a platform built to help students collaborate and share study materials seamlessly. It provides an easy-to-use interface for uploading documents, accessing shared resources, and interacting with other students through forums and discussion threads. The platform aims to create a community where students can easily find study resources and help each other succeed academically.
+>https://scholarsharenet.vercel.app/
+>jamal.majadle02@gmail.com
+>112233//Mj
 
 ## Features
 
